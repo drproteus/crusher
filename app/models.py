@@ -21,11 +21,21 @@ class Staff(models.Model):
     billing_address = models.TextField(blank=True)
     notes = models.TextField(blank=True)
 
+    def new_sku(self, **sku_kwargs):
+        sku = SKU(**sku_kwargs, staff=self)
+        sku.save()
+        return sku
+
 
 class Item(models.Model):
     name = models.CharField(max_length=256, default="Item")
     description = models.TextField(blank=True)
     stock = models.DecimalField(max_digits=32, decimal_places=2, default=Decimal(1.00))
+
+    def new_sku(self, **sku_kwargs):
+        sku = SKU(**sku_kwargs, item=self)
+        sku.save()
+        return sku
 
 
 class SKUQuerySet(models.QuerySet):
@@ -60,9 +70,15 @@ class SKU(models.Model):
     default_rate = models.DecimalField(
         default=Decimal(1.0), max_digits=32, decimal_places=2
     )
-    units = models.CharField(blank=True, max_length=32)
+    units = models.CharField(blank=True, max_length=32, default="unit")
 
     objects = SKUManager()
+
+    def save(self, *args, **kwargs):
+        sku_model = self.staff or self.item
+        if sku_model:
+            self.name = f"{sku_model.name} @ {self.default_quantity} x {self.default_rate}/{self.units}"
+        super().save()
 
 
 class InvoiceState(Enum):
