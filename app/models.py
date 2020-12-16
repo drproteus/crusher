@@ -31,6 +31,7 @@ class Item(models.Model):
     name = models.CharField(max_length=256, default="Item")
     description = models.TextField(blank=True)
     stock = models.DecimalField(max_digits=32, decimal_places=2, default=Decimal(1.00))
+    upc = models.CharField(max_length=256, blank=True)
 
     def new_sku(self, **sku_kwargs):
         sku = SKU(**sku_kwargs, item=self)
@@ -46,7 +47,7 @@ class SKUQuerySet(models.QuerySet):
         return self.filter(item__is_null=False, staff__is_null=True)
 
     def other(self):
-        return self.filter(item__is_null=True, staff_is_null=True)
+        return self.filter(item__is_null=True, staff__is_null=True)
 
 
 class SKUManager(models.Manager):
