@@ -4,6 +4,7 @@ services:
     build: .
     volumes:
       - .:/var/run/crusher
+      - assets:/var/www/assets
     ports:
       - "8080:8080"
     environment:
@@ -14,6 +15,15 @@ services:
     command: "gunicorn -b 0.0.0.0:8080 crusher.wsgi"
     depends_on:
       - db
+  # caddy:
+  #   image: caddy:2.1.1-alpine
+  #   volumes:
+  #     - ./Caddyfile:/etc/caddy/Caddyfile
+  #     - assets:/var/www/assets:ro
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+  #   restart: unless-stopped
   db:
     image: mariadb:10
     volumes:
@@ -29,3 +39,4 @@ services:
     restart: unless-stopped
 volumes:
   mariadb_data:
+  assets:

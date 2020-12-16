@@ -1,0 +1,8 @@
+crusher.earthmanlabs.com {
+    reverse_proxy * web:8080
+}
+
+crusher-assets.earthmanlabs.com {
+    root * /var/www/assets
+    file_server *
+}
