@@ -95,6 +95,8 @@ class Invoice(models.Model):
     state = models.IntegerField(
         choices=[(st, st.value) for st in InvoiceState], default=InvoiceState.DRAFT
     )
+    initial_balance = models.DecimalField(max_digits=32, decimal_places=2)
+    paid_balance = models.DecimalField(max_digits=32, decimal_places=2)
 
 
 class LineItem(models.Model):
