@@ -40,3 +40,6 @@ shell:
 
 bash:
 	docker-compose run --rm web /bin/bash
+
+init-env:
+	python -m virtualenv -p `which python3` env/
