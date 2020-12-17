@@ -111,13 +111,29 @@ class Invoice(DjangoObjectType):
         return self.line_items.filter(sku__metadata__type="item")
 
 
+class ClientMutation(graphene.Mutation):
+    class Arguments:
+        company = graphene.String(required=True)
+        metadata = generic.GenericScalar(required=False)
+
+    client = graphene.Field(lambda: Client)
+
+    @classmethod
+    def mutate(cls, root, info, company, metadata=None):
+        client = ClientModel.objects.create(company=company, metadata=metadata)
+        return ClientMutation(client=client)
+
+
+class Mutations(graphene.ObjectType):
+    create_client = ClientMutation.Field()
+
+
 class Query(graphene.ObjectType):
     invoices = graphene.List(Invoice)
     skus = graphene.List(SKU)
     transport_skus = graphene.List(SKU)
     staff_skus = graphene.List(SKU)
     item_skus = graphene.List(SKU)
-
 
     def resolve_invoices(self, info):
         return InvoiceModel.objects.all()
@@ -135,4 +151,4 @@ class Query(graphene.ObjectType):
         return SKUModel.items.all()
 
 
-schema = graphene.Schema(query=Query)
+schema = graphene.Schema(query=Query, mutation=Mutations)
