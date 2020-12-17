@@ -1,8 +1,6 @@
 from django.db import models, transaction
 from decimal import Decimal
-from enum import Enum
 from django.conf import settings
-from uuid import uuid4
 
 
 class Client(models.Model):
@@ -11,6 +9,40 @@ class Client(models.Model):
     mobile = models.CharField(max_length=256, blank=True)
     mailing_address = models.TextField(blank=True)
     billing_address = models.TextField(blank=True)
+    metadata = models.JSONField(null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+
+class Vessel(models.Model):
+    name = models.CharField(max_length=256)
+    mmsi = models.CharField(max_length=9, help_text="Maritime Mobile Service Identity")
+    client = models.ForeignKey(Client, on_delete=models.CASCADE, null=False)
+    metadata = models.JSONField(null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+
+class Request(models.Model):
+    class RequestState(models.IntegerChoices):
+        RECEIVED = 0
+        IN_PROGRESS = 1
+        REJECTED = -1
+        PROCESSED = 2
+
+    state = models.IntegerField(
+        choices=RequestState.choices, default=RequestState.RECEIVED
+    )
+    client = models.ForeignKey(Client, on_delete=models.CASCADE, null=False)
+    metadata = models.JSONField(null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+
+class Job(models.Model):
+    vessel = models.ForeignKey(Vessel, on_delete=models.CASCADE, null=False)
+    origin_request = models.ForeignKey(Request, on_delete=models.SET_NULL, null=True)
+    metadata = models.JSONField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -87,7 +119,7 @@ class Invoice(models.Model):
         CLOSED = 4
         VOID = -1
 
-    client = models.ForeignKey(Client, on_delete=models.SET_NULL, null=True)
+    job = models.ForeignKey(Job, on_delete=models.SET_NULL, null=True)
     state = models.IntegerField(
         choices=InvoiceState.choices, default=InvoiceState.DRAFT
     )
@@ -124,6 +156,7 @@ class LineItem(models.Model):
     price = models.DecimalField(max_digits=32, decimal_places=2)
     subtotal = models.DecimalField(max_digits=32, decimal_places=2)
     posted_date = models.DateTimeField(auto_now_add=True)
+    service_date = models.DateTimeField(auto_now_add=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -142,3 +175,4 @@ class Credit(models.Model):
     posted_date = models.DateTimeField(auto_now_add=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
