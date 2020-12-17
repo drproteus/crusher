@@ -2,6 +2,7 @@ from django.db import models, transaction
 from decimal import Decimal
 from enum import Enum
 from django.conf import settings
+from uuid import uuid4
 
 
 class Client(models.Model):
@@ -14,80 +15,67 @@ class Client(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
 
-class Staff(models.Model):
-    title = models.CharField(max_length=32, blank=True)
-    first_name = models.CharField(max_length=256)
-    last_name = models.CharField(max_length=256)
-    role = models.CharField(max_length=256)
-    email = models.EmailField(max_length=256, blank=True)
-    phone_number = models.CharField(max_length=256, blank=True)
-    mailing_address = models.TextField(blank=True)
-    billing_address = models.TextField(blank=True)
-    notes = models.TextField(blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+class StaffManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(data__type="staff")
 
-    @property
-    def name(self):
-        name = f"{self.first_name} {self.last_name}"
-        if self.title:
-            return f"{self.title} {name}"
-        return name
-
-    def new_sku(self, **sku_kwargs):
+    def create(self, staff_data, **sku_kwargs):
+        sku_kwargs["metadata"] = sku_kwargs.get("metadata", {"type": "staff"})
+        sku_kwargs["metadata"].update(staff_data)
         sku_kwargs["units"] = sku_kwargs.get("units", "hour")
-        sku = SKU(**sku_kwargs, staff=self)
-        sku.save()
-        return sku
+        # VALIDATE
+        return super().create(**sku_kwargs)
 
 
-class Item(models.Model):
-    name = models.CharField(max_length=256)
-    description = models.TextField(blank=True)
-    stock = models.DecimalField(max_digits=32, decimal_places=2, default=Decimal(1.00))
-    upc = models.CharField(max_length=256, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+class ItemManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(data__type="item")
 
-    def new_sku(self, **sku_kwargs):
-        sku = SKU(**sku_kwargs, item=self)
-        sku.save()
-        return sku
+    def create(self, item_data, **sku_kwargs):
+        sku_kwargs["metadata"] = sku_kwargs.get("metadata", {"type": "item"})
+        sku_kwargs["metadata"].update(item_data)
+        # VALIDATE
+        return super().create(**sku_kwargs)
+
+
+class TransportationManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(data__type="transport")
+
+    def create(self, transport_data, **sku_kwargs):
+        sku_kwargs["metadata"] = sku_kwargs.get("metadata", {"type": "transport"})
+        sku_kwargs["metadata"].update(transport_data)
+        sku_kwargs["units"] = sku_kwargs.get("units", "mile")
+        # VALIDATE
+        return super().create(**sku_kwargs)
 
 
 class SKU(models.Model):
     name = models.CharField(blank=True, max_length=256)
-    staff = models.ForeignKey(Staff, on_delete=models.SET_NULL, null=True)
-    item = models.ForeignKey(Item, on_delete=models.SET_NULL, null=True)
+    metadata = models.JSONField()
     default_quantity = models.DecimalField(
         default=Decimal(1.0), max_digits=32, decimal_places=2
     )
     default_price = models.DecimalField(
         default=Decimal(1.0), max_digits=32, decimal_places=2
     )
-    minium_quantity = models.DecimalField(
-        null=True, max_digits=32, decimal_places=2
-    )
-    minimum_price = models.DecimalField(
-        null=True, max_digits=32, decimal_places=2
-    )
-    maximum_quantity = models.DecimalField(
-        null=True, max_digits=32, decimal_places=2
-    )
-    maximum_price = models.DecimalField(
-        null=True, max_digits=32, decimal_places=2
-    )
+    minium_quantity = models.DecimalField(null=True, max_digits=32, decimal_places=2)
+    minimum_price = models.DecimalField(null=True, max_digits=32, decimal_places=2)
+    maximum_quantity = models.DecimalField(null=True, max_digits=32, decimal_places=2)
+    maximum_price = models.DecimalField(null=True, max_digits=32, decimal_places=2)
     units = models.CharField(blank=True, max_length=32, default="unit")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    staff = StaffManager()
+    items = ItemManager()
+    transportation = TransportationManager()
 
     def add_to_invoice(self, invoice, **li_kwargs):
         li_kwargs = li_kwargs or {}
         li_kwargs["quantity"] = li_kwargs.get("quantity", self.default_quantity)
         li_kwargs["price"] = li_kwargs.get("price", self.default_price)
-        li = LineItem(sku=self, invoice=invoice, **li_kwargs)
-        li.save()
-        return li
+        return LineItem.objects.create(sku=self, invoice=invoice, **li_kwargs)
 
 
 class Invoice(models.Model):
@@ -154,16 +142,3 @@ class Credit(models.Model):
     posted_date = models.DateTimeField(auto_now_add=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
-
-if settings.DEBUG:
-    from mixer.backend.django import mixer
-    mixer.register(
-        Staff,
-        role=lambda: mixer.faker.job(),
-        phone_number=lambda: mixer.faker.phone_number(),
-        mailing_address=lambda: mixer.faker.address(),
-        billing_address=lambda: mixer.faker.address(),
-    )
-    mixer.register(Item, upc=lambda: mixer.faker.ean())
-    mixer.register(Invoice)
