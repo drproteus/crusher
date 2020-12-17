@@ -6,13 +6,9 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('app', '0001_initial'),
+        ("app", "0001_initial"),
     ]
 
     operations = [
-        migrations.RenameField(
-            model_name='sku',
-            old_name='data',
-            new_name='metadata',
-        ),
+        migrations.RenameField(model_name="sku", old_name="data", new_name="metadata",),
     ]

@@ -23,7 +23,9 @@ class Vessel(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=256)
     mmsi = models.CharField(max_length=9, help_text="Maritime Mobile Service Identity")
-    client = models.ForeignKey(Client, on_delete=models.CASCADE, null=False, related_name="vessels")
+    client = models.ForeignKey(
+        Client, on_delete=models.CASCADE, null=False, related_name="vessels"
+    )
     metadata = models.JSONField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -43,7 +45,9 @@ class Request(models.Model):
     state = models.IntegerField(
         choices=RequestState.choices, default=RequestState.RECEIVED
     )
-    client = models.ForeignKey(Client, on_delete=models.CASCADE, null=False, related_name="requests")
+    client = models.ForeignKey(
+        Client, on_delete=models.CASCADE, null=False, related_name="requests"
+    )
     metadata = models.JSONField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -54,7 +58,9 @@ class Request(models.Model):
 
 class Job(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    vessel = models.ForeignKey(Vessel, on_delete=models.SET_NULL, null=True, related_name="jobs")
+    vessel = models.ForeignKey(
+        Vessel, on_delete=models.SET_NULL, null=True, related_name="jobs"
+    )
     origin_request = models.ForeignKey(Request, on_delete=models.SET_NULL, null=True)
     metadata = models.JSONField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)

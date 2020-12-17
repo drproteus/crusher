@@ -7,23 +7,38 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('app', '0006_auto_20201217_1847'),
+        ("app", "0006_auto_20201217_1847"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='credit',
-            name='line_item',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='applied_credits', to='app.lineitem'),
+            model_name="credit",
+            name="line_item",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="applied_credits",
+                to="app.lineitem",
+            ),
         ),
         migrations.AlterField(
-            model_name='invoice',
-            name='job',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='invoices', to='app.job'),
+            model_name="invoice",
+            name="job",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="invoices",
+                to="app.job",
+            ),
         ),
         migrations.AlterField(
-            model_name='lineitem',
-            name='sku',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='+', to='app.sku'),
+            model_name="lineitem",
+            name="sku",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="+",
+                to="app.sku",
+            ),
         ),
     ]
