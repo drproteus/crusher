@@ -17,7 +17,7 @@ class Client(models.Model):
 
 class StaffManager(models.Manager):
     def get_queryset(self):
-        return super().get_queryset().filter(data__type="staff")
+        return super().get_queryset().filter(metadata__type="staff")
 
     def create(self, staff_data, **sku_kwargs):
         sku_kwargs["metadata"] = sku_kwargs.get("metadata", {"type": "staff"})
@@ -29,7 +29,7 @@ class StaffManager(models.Manager):
 
 class ItemManager(models.Manager):
     def get_queryset(self):
-        return super().get_queryset().filter(data__type="item")
+        return super().get_queryset().filter(metadata__type="item")
 
     def create(self, item_data, **sku_kwargs):
         sku_kwargs["metadata"] = sku_kwargs.get("metadata", {"type": "item"})
@@ -40,7 +40,7 @@ class ItemManager(models.Manager):
 
 class TransportationManager(models.Manager):
     def get_queryset(self):
-        return super().get_queryset().filter(data__type="transport")
+        return super().get_queryset().filter(metadata__type="transport")
 
     def create(self, transport_data, **sku_kwargs):
         sku_kwargs["metadata"] = sku_kwargs.get("metadata", {"type": "transport"})
