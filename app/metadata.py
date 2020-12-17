@@ -66,7 +66,7 @@ class ItemMetadataSchema(SKUMetadataSchema):
     stock = fields.Float()
     upc = fields.Str()
     vendor = fields.Str()
-    vendor_contact = fields.Str()
+    contact = fields.Str()
 
     @post_load
     def set_type(self, item, many, **kwargs):
@@ -79,10 +79,16 @@ class ItemMetadataSchema(SKUMetadataSchema):
     #         raise ValidationError("Item metadata type required")
 
 
+class TransportPointSchema(Schema):
+    address = fields.Str()
+    geoloc_longitude = fields.Str()
+    geoloc_latitude = fields.Str()
+
+
 class TransportMetadataSchema(SKUMetadataSchema):
-    vendor = fields.Str()
-    vendor_contact = fields.Str()
-    driver_contact = fields.Str()
+    method = fields.Str()
+    contact = fields.Str()
+    points = fields.Nested(TransportPointSchema, many=True)
 
     @post_load
     def set_type(self, item, many, **kwargs):
@@ -93,3 +99,14 @@ class TransportMetadataSchema(SKUMetadataSchema):
     # def check_staff_type(self, data, **kwargs):
     #     if data != "transport":
     #         raise ValidationError("Transport metadata type required")
+
+
+class VoyagePointSchema(Schema):
+    intent = fields.Str()
+    status = fields.Str()
+    geoloc_longitude = fields.Str()
+    geoloc_latitude = fields.Str()
+
+
+class JobMetadataSchema(Schema):
+    voyage = fields.Nested(VoyagePointSchema, many=True)
