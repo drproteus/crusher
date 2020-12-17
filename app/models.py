@@ -182,6 +182,9 @@ class Invoice(models.Model):
         VOID = -1
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    client = models.ForeignKey(
+        Client, on_delete=models.SET_NULL, null=True, related_name="invoices"
+    )
     job = models.ForeignKey(
         Job, on_delete=models.SET_NULL, null=True, related_name="invoices"
     )
@@ -194,6 +197,7 @@ class Invoice(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     tags = GenericRelation(Tag)
+    metadata = models.JSONField(null=True)
 
     def __str__(self):
         return f"{self.state}|{self.created_at}|INITIAL:{self.initial_balance}|PAID:{self.paid_balance}|DUE:{self.due_date}|{self.id}"
