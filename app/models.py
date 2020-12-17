@@ -1,18 +1,21 @@
-from django.db import models
+from django.db import models, transaction
 from decimal import Decimal
 from enum import Enum
 from mixer.backend.django import mixer
 
 
 class Client(models.Model):
-    company_name = models.CharField(max_length=256)
+    company = models.CharField(max_length=256)
     email = models.EmailField(max_length=256, blank=True)
     mobile = models.CharField(max_length=256, blank=True)
     mailing_address = models.TextField(blank=True)
     billing_address = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
 
 class Staff(models.Model):
+    title = models.CharField(max_length=32, blank=True)
     first_name = models.CharField(max_length=256)
     last_name = models.CharField(max_length=256)
     role = models.CharField(max_length=256)
@@ -21,8 +24,18 @@ class Staff(models.Model):
     mailing_address = models.TextField(blank=True)
     billing_address = models.TextField(blank=True)
     notes = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    @property
+    def name(self):
+        name = f"{self.first_name} {self.last_name}"
+        if self.title:
+            return f"{self.title} {name}"
+        return name
 
     def new_sku(self, **sku_kwargs):
+        sku_kwargs["units"] = sku_kwargs.get("units", "hour")
         sku = SKU(**sku_kwargs, staff=self)
         sku.save()
         return sku
@@ -33,33 +46,13 @@ class Item(models.Model):
     description = models.TextField(blank=True)
     stock = models.DecimalField(max_digits=32, decimal_places=2, default=Decimal(1.00))
     upc = models.CharField(max_length=256, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def new_sku(self, **sku_kwargs):
         sku = SKU(**sku_kwargs, item=self)
         sku.save()
         return sku
-
-
-class SKUQuerySet(models.QuerySet):
-    def staff(self):
-        return self.filter(staff__is_null=False, item__is_null=True)
-
-    def items(self):
-        return self.filter(item__is_null=False, staff__is_null=True)
-
-    def other(self):
-        return self.filter(item__is_null=True, staff__is_null=True)
-
-
-class SKUManager(models.Manager):
-    def get_queryset(self):
-        return SKUQuerySet(self.model, using=self._db)
-
-    def staff(self):
-        return self.get_queryset().staff()
-
-    def items(self):
-        return self.get_queryset().items()
 
 
 class SKU(models.Model):
@@ -73,8 +66,8 @@ class SKU(models.Model):
         default=Decimal(1.0), max_digits=32, decimal_places=2
     )
     units = models.CharField(blank=True, max_length=32, default="unit")
-
-    objects = SKUManager()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def add_to_invoice(self, invoice, **li_kwargs):
         li_kwargs = li_kwargs or {}
@@ -100,6 +93,26 @@ class Invoice(models.Model):
     )
     initial_balance = models.DecimalField(max_digits=32, decimal_places=2, default=0)
     paid_balance = models.DecimalField(max_digits=32, decimal_places=2, default=0)
+    due_date = models.DateTimeField(null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def get_initial_balance(self):
+        return sum(self.line_items.all().values_list("subtotal", flat=True))
+
+    def get_paid_balance(self):
+        return sum(self.credits.all().values_list("amount", flat=True))
+
+    def get_remaining_balance(self):
+        return self.get_initial_balance() - self.get_paid_balance()
+
+    @property
+    def remaining_balance(self):
+        return self.initial_balance - self.paid_balance
+
+    def update_balances(self):
+        self.initial_balance = self.get_initial_balance()
+        self.paid_balance = self.get_paid_balance()
 
 
 class LineItem(models.Model):
@@ -110,10 +123,23 @@ class LineItem(models.Model):
     quantity = models.DecimalField(max_digits=32, decimal_places=2)
     price = models.DecimalField(max_digits=32, decimal_places=2)
     subtotal = models.DecimalField(max_digits=32, decimal_places=2)
+    posted_date = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def save(self, *args, **kwargs):
         self.subtotal = self.price * self.quantity
         return super().save()
+
+
+class Credit(models.Model):
+    invoice = models.ForeignKey(
+        Invoice, on_delete=models.CASCADE, related_name="credits"
+    )
+    amount = models.DecimalField(max_digits=32, decimal_places=2)
+    posted_date = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
 
 mixer.register(
