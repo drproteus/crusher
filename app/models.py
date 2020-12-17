@@ -47,7 +47,22 @@ class Job(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
 
-class StaffManager(models.Manager):
+class SKUQuerySet(models.QuerySet):
+    def add_to_invoice(self, invoice):
+        new_line_item_ids = set()
+        with transaction.atomic():
+            for sku in self.all():
+                li = sku.add_to_invoice(invoice)
+                new_line_item_ids.add(li.id)
+        return LineItem.objects.filter(id__in=new_line_item_ids)
+
+
+class SKUManager(models.Manager):
+    def get_queryset(self):
+        return SKUQuerySet(self.model, using=self._db)
+
+
+class StaffManager(SKUManager):
     def get_queryset(self):
         return super().get_queryset().filter(metadata__type="staff")
 
@@ -59,7 +74,7 @@ class StaffManager(models.Manager):
         return super().create(**sku_kwargs)
 
 
-class ItemManager(models.Manager):
+class ItemManager(SKUManager):
     def get_queryset(self):
         return super().get_queryset().filter(metadata__type="item")
 
@@ -70,7 +85,7 @@ class ItemManager(models.Manager):
         return super().create(**sku_kwargs)
 
 
-class TransportationManager(models.Manager):
+class TransportationManager(SKUManager):
     def get_queryset(self):
         return super().get_queryset().filter(metadata__type="transport")
 
@@ -102,6 +117,7 @@ class SKU(models.Model):
     staff = StaffManager()
     items = ItemManager()
     transportation = TransportationManager()
+    objects = SKUManager()
 
     def add_to_invoice(self, invoice, **li_kwargs):
         li_kwargs = li_kwargs or {}
@@ -143,8 +159,11 @@ class Invoice(models.Model):
         return self.initial_balance - self.paid_balance
 
     def update_balances(self):
-        self.initial_balance = self.get_initial_balance()
-        self.paid_balance = self.get_paid_balance()
+        self.initial_balance, self.paid_balance = (
+            self.get_initial_balance(),
+            self.get_paid_balance(),
+        )
+        self.save()
 
 
 class LineItem(models.Model):
@@ -175,3 +194,11 @@ class Credit(models.Model):
     posted_date = models.DateTimeField(auto_now_add=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+
+from django.contrib import admin
+
+
+@admin.register(Client, Vessel, Request, Job, SKU, LineItem, Invoice, Credit)
+class CrusherAdmin(admin.ModelAdmin):
+    pass
