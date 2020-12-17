@@ -23,7 +23,7 @@ class Vessel(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=256)
     mmsi = models.CharField(max_length=9, help_text="Maritime Mobile Service Identity")
-    client = models.ForeignKey(Client, on_delete=models.CASCADE, null=False)
+    client = models.ForeignKey(Client, on_delete=models.CASCADE, null=False, related_name="vessels")
     metadata = models.JSONField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -43,7 +43,7 @@ class Request(models.Model):
     state = models.IntegerField(
         choices=RequestState.choices, default=RequestState.RECEIVED
     )
-    client = models.ForeignKey(Client, on_delete=models.CASCADE, null=False)
+    client = models.ForeignKey(Client, on_delete=models.CASCADE, null=False, related_name="requests")
     metadata = models.JSONField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -54,7 +54,7 @@ class Request(models.Model):
 
 class Job(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    vessel = models.ForeignKey(Vessel, on_delete=models.SET_NULL, null=True)
+    vessel = models.ForeignKey(Vessel, on_delete=models.SET_NULL, null=True, related_name="jobs")
     origin_request = models.ForeignKey(Request, on_delete=models.SET_NULL, null=True)
     metadata = models.JSONField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -163,7 +163,9 @@ class Invoice(models.Model):
         VOID = -1
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    job = models.ForeignKey(Job, on_delete=models.SET_NULL, null=True)
+    job = models.ForeignKey(
+        Job, on_delete=models.SET_NULL, null=True, related_name="invoices"
+    )
     state = models.IntegerField(
         choices=InvoiceState.choices, default=InvoiceState.DRAFT
     )
@@ -202,7 +204,7 @@ class LineItem(models.Model):
     invoice = models.ForeignKey(
         Invoice, on_delete=models.CASCADE, related_name="line_items"
     )
-    sku = models.ForeignKey(SKU, null=True, on_delete=models.SET_NULL)
+    sku = models.ForeignKey(SKU, null=True, on_delete=models.SET_NULL, related_name="+")
     quantity = models.DecimalField(max_digits=32, decimal_places=2)
     price = models.DecimalField(max_digits=32, decimal_places=2)
     subtotal = models.DecimalField(max_digits=32, decimal_places=2)
@@ -226,7 +228,9 @@ class Credit(models.Model):
     )
     amount = models.DecimalField(max_digits=32, decimal_places=2)
     memo = models.TextField(blank=True)
-    line_item = models.ForeignKey(LineItem, on_delete=models.SET_NULL, null=True)
+    line_item = models.ForeignKey(
+        LineItem, on_delete=models.SET_NULL, null=True, related_name="applied_credits"
+    )
     posted_date = models.DateTimeField(auto_now_add=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
