@@ -33,4 +33,10 @@ rebuild:
 clean:
 	docker-compose down
 	docker-compose rm
+	docker volume ls --format '{{.Name}}' | grep crusher_ | xargs -I {} docker volume rm {}
 
+shell:
+	docker-compose run --rm web python manage.py shell
+
+bash:
+	docker-compose run --rm web /bin/bash

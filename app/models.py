@@ -1,10 +1,11 @@
 from django.db import models
 from decimal import Decimal
 from enum import Enum
+from mixer.backend.django import mixer
 
 
 class Client(models.Model):
-    name = models.CharField(max_length=256, default="Item")
+    company_name = models.CharField(max_length=256)
     email = models.EmailField(max_length=256, blank=True)
     mobile = models.CharField(max_length=256, blank=True)
     mailing_address = models.TextField(blank=True)
@@ -12,11 +13,11 @@ class Client(models.Model):
 
 
 class Staff(models.Model):
-    first_name = models.CharField(max_length=256, default="Leonard")
-    last_name = models.CharField(max_length=256, default="McCoy")
-    designation = models.CharField(max_length=256, default="Chief Medical Officer")
+    first_name = models.CharField(max_length=256)
+    last_name = models.CharField(max_length=256)
+    role = models.CharField(max_length=256)
     email = models.EmailField(max_length=256, blank=True)
-    mobile = models.CharField(max_length=256, blank=True)
+    phone_number = models.CharField(max_length=256, blank=True)
     mailing_address = models.TextField(blank=True)
     billing_address = models.TextField(blank=True)
     notes = models.TextField(blank=True)
@@ -28,7 +29,7 @@ class Staff(models.Model):
 
 
 class Item(models.Model):
-    name = models.CharField(max_length=256, default="Item")
+    name = models.CharField(max_length=256)
     description = models.TextField(blank=True)
     stock = models.DecimalField(max_digits=32, decimal_places=2, default=Decimal(1.00))
     upc = models.CharField(max_length=256, blank=True)
@@ -68,36 +69,37 @@ class SKU(models.Model):
     default_quantity = models.DecimalField(
         default=Decimal(1.0), max_digits=32, decimal_places=2
     )
-    default_rate = models.DecimalField(
+    default_price = models.DecimalField(
         default=Decimal(1.0), max_digits=32, decimal_places=2
     )
     units = models.CharField(blank=True, max_length=32, default="unit")
 
     objects = SKUManager()
 
-    def save(self, *args, **kwargs):
-        sku_model = self.staff or self.item
-        if sku_model:
-            self.name = f"{sku_model.name} @ {self.default_quantity} x {self.default_rate}/{self.units}"
-        super().save()
-
-
-class InvoiceState(Enum):
-    DRAFT = 0
-    OPEN = 1
-    PAID_PARTIAL = 2
-    PAID_FULL = 3
-    CLOSED = 4
-    VOID = -1
+    def add_to_invoice(self, invoice, **li_kwargs):
+        li_kwargs = li_kwargs or {}
+        li_kwargs["quantity"] = li_kwargs.get("quantity", self.default_quantity)
+        li_kwargs["price"] = li_kwargs.get("price", self.default_price)
+        li = LineItem(sku=self, invoice=invoice, **li_kwargs)
+        li.save()
+        return li
 
 
 class Invoice(models.Model):
+    class InvoiceState(models.IntegerChoices):
+        DRAFT = 0
+        OPEN = 1
+        PAID_PARTIAL = 2
+        PAID_FULL = 3
+        CLOSED = 4
+        VOID = -1
+
     client = models.ForeignKey(Client, on_delete=models.SET_NULL, null=True)
     state = models.IntegerField(
-        choices=[(st, st.value) for st in InvoiceState], default=InvoiceState.DRAFT
+        choices=InvoiceState.choices, default=InvoiceState.DRAFT
     )
-    initial_balance = models.DecimalField(max_digits=32, decimal_places=2)
-    paid_balance = models.DecimalField(max_digits=32, decimal_places=2)
+    initial_balance = models.DecimalField(max_digits=32, decimal_places=2, default=0)
+    paid_balance = models.DecimalField(max_digits=32, decimal_places=2, default=0)
 
 
 class LineItem(models.Model):
@@ -106,9 +108,20 @@ class LineItem(models.Model):
     )
     sku = models.ForeignKey(SKU, null=True, on_delete=models.SET_NULL)
     quantity = models.DecimalField(max_digits=32, decimal_places=2)
-    rate = models.DecimalField(max_digits=32, decimal_places=2)
+    price = models.DecimalField(max_digits=32, decimal_places=2)
     subtotal = models.DecimalField(max_digits=32, decimal_places=2)
 
     def save(self, *args, **kwargs):
-        self.subtotal = self.rate * self.quantity
+        self.subtotal = self.price * self.quantity
         return super().save()
+
+
+mixer.register(
+    Staff,
+    role=lambda: mixer.faker.job(),
+    phone_number=lambda: mixer.faker.phone_number(),
+    mailing_address=lambda: mixer.faker.address(),
+    billing_address=lambda: mixer.faker.address(),
+)
+mixer.register(Item, upc=lambda: mixer.faker.ean())
+mixer.register(Invoice)
