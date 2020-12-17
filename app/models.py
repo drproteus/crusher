@@ -1,7 +1,7 @@
 from django.db import models, transaction
 from decimal import Decimal
 from enum import Enum
-from mixer.backend.django import mixer
+from django.conf import settings
 
 
 class Client(models.Model):
@@ -137,17 +137,21 @@ class Credit(models.Model):
         Invoice, on_delete=models.CASCADE, related_name="credits"
     )
     amount = models.DecimalField(max_digits=32, decimal_places=2)
+    memo = models.TextField(blank=True)
+    line_item = models.ForeignKey(LineItem, on_delete=models.SET_NULL, null=True)
     posted_date = models.DateTimeField(auto_now_add=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
 
-mixer.register(
-    Staff,
-    role=lambda: mixer.faker.job(),
-    phone_number=lambda: mixer.faker.phone_number(),
-    mailing_address=lambda: mixer.faker.address(),
-    billing_address=lambda: mixer.faker.address(),
-)
-mixer.register(Item, upc=lambda: mixer.faker.ean())
-mixer.register(Invoice)
+if settings.DEBUG:
+    from mixer.backend.django import mixer
+    mixer.register(
+        Staff,
+        role=lambda: mixer.faker.job(),
+        phone_number=lambda: mixer.faker.phone_number(),
+        mailing_address=lambda: mixer.faker.address(),
+        billing_address=lambda: mixer.faker.address(),
+    )
+    mixer.register(Item, upc=lambda: mixer.faker.ean())
+    mixer.register(Invoice)
