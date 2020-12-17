@@ -21,10 +21,10 @@ class Tag(models.Model):
 class Client(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     company = models.CharField(max_length=256)
-    email = models.EmailField(max_length=256, blank=True)
-    mobile = models.CharField(max_length=256, blank=True)
-    mailing_address = models.TextField(blank=True)
-    billing_address = models.TextField(blank=True)
+    email = models.EmailField(max_length=256, blank=True, default="")
+    mobile = models.CharField(max_length=256, blank=True, default="")
+    mailing_address = models.TextField(blank=True, default="")
+    billing_address = models.TextField(blank=True, default="")
     metadata = models.JSONField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -37,7 +37,7 @@ class Client(models.Model):
 class Vessel(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=256)
-    mmsi = models.CharField(max_length=9, help_text="Maritime Mobile Service Identity")
+    mmsi = models.CharField(max_length=9, blank=True, default="", help_text="Maritime Mobile Service Identity")
     client = models.ForeignKey(
         Client, on_delete=models.CASCADE, null=False, related_name="vessels"
     )

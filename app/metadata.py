@@ -1,40 +1,4 @@
-from dataclasses import dataclass
 from marshmallow import Schema, fields, validates, ValidationError, post_load
-
-
-@dataclass
-class SKUMetadata:
-    type: str
-
-
-@dataclass
-class StaffMetadata(SKUMetadata):
-    first_name: str
-    last_name: str
-    billing_address: str
-    mailing_address: str
-    phone_number: str
-    email: str
-    affiliate_client_ids: list
-
-
-@dataclass
-class ItemMetadata(SKUMetadata):
-    name: str
-    stock: float
-    upc: str
-    vendor: str
-    vendor_contact: str
-
-
-@dataclass
-class TransportMetadata(SKUMetadata):
-    vendor: str
-    vendor_contact: str
-    driver_contact: str
-
-
-# ---
 
 
 class SKUMetadataSchema(Schema):

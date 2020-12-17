@@ -48,7 +48,6 @@ class ItemFactory(factory.django.DjangoModelFactory):
         lambda o: {
             "type": "item",
             "name": fake.word(),
-            "stock": 99,
             "upc": fake.upc_e(),
         }
     )
@@ -66,5 +65,3 @@ class TransportFactory(factory.django.DjangoModelFactory):
         lambda: {"vendor": fake.random_element(TRANSPORT_OPTIONS), "type": "transport"}
     )
     units = "mile"
-
-
