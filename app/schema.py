@@ -134,6 +134,7 @@ class Query(graphene.ObjectType):
     transport_skus = graphene.List(SKU)
     staff_skus = graphene.List(SKU)
     item_skus = graphene.List(SKU)
+    clients = graphene.List(Client)
 
     def resolve_invoices(self, info):
         return InvoiceModel.objects.all()
@@ -149,6 +150,9 @@ class Query(graphene.ObjectType):
 
     def resolve_item_skus(self, info):
         return SKUModel.items.all()
+
+    def resolve_clients(self, info):
+        return ClientModel.objects.all()
 
 
 schema = graphene.Schema(query=Query, mutation=Mutations)
