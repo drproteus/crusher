@@ -1,5 +1,7 @@
 from graphene_django import DjangoObjectType
 import graphene
+from graphene.types import generic
+
 
 from app.models import (
     Invoice as InvoiceModel,
@@ -17,12 +19,15 @@ class Client(DjangoObjectType):
     class Meta:
         model = ClientModel
 
+    metadata = generic.GenericScalar()
+
 
 class Vessel(DjangoObjectType):
     class Meta:
         model = VesselModel
 
     client = graphene.Field(Client)
+    metadata = generic.GenericScalar()
 
     def resolve_client(self, info):
         return self.client
@@ -33,6 +38,7 @@ class Request(DjangoObjectType):
         model = RequestModel
 
     client = graphene.Field(Client)
+    metadata = generic.GenericScalar()
 
     def resolve_client(self, info):
         return self.client
@@ -44,11 +50,14 @@ class Job(DjangoObjectType):
 
     vessel = graphene.Field(Vessel)
     origin_request = graphene.Field(Request)
+    metadata = generic.GenericScalar()
 
 
 class SKU(DjangoObjectType):
     class Meta:
         model = SKUModel
+
+    metadata = generic.GenericScalar()
 
 
 class LineItem(DjangoObjectType):
