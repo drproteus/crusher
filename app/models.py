@@ -1,9 +1,11 @@
 from django.db import models, transaction
 from decimal import Decimal
 from django.conf import settings
+import uuid
 
 
 class Client(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     company = models.CharField(max_length=256)
     email = models.EmailField(max_length=256, blank=True)
     mobile = models.CharField(max_length=256, blank=True)
@@ -18,6 +20,7 @@ class Client(models.Model):
 
 
 class Vessel(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=256)
     mmsi = models.CharField(max_length=9, help_text="Maritime Mobile Service Identity")
     client = models.ForeignKey(Client, on_delete=models.CASCADE, null=False)
@@ -36,6 +39,7 @@ class Request(models.Model):
         REJECTED = -1
         PROCESSED = 2
 
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     state = models.IntegerField(
         choices=RequestState.choices, default=RequestState.RECEIVED
     )
@@ -49,6 +53,7 @@ class Request(models.Model):
 
 
 class Job(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     vessel = models.ForeignKey(Vessel, on_delete=models.SET_NULL, null=True)
     origin_request = models.ForeignKey(Request, on_delete=models.SET_NULL, null=True)
     metadata = models.JSONField(null=True)
@@ -110,6 +115,7 @@ class TransportationManager(SKUManager):
 
 
 class SKU(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(blank=True, max_length=256)
     metadata = models.JSONField()
     default_quantity = models.DecimalField(
@@ -156,6 +162,7 @@ class Invoice(models.Model):
         CLOSED = 4
         VOID = -1
 
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     job = models.ForeignKey(Job, on_delete=models.SET_NULL, null=True)
     state = models.IntegerField(
         choices=InvoiceState.choices, default=InvoiceState.DRAFT
@@ -191,6 +198,7 @@ class Invoice(models.Model):
 
 
 class LineItem(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     invoice = models.ForeignKey(
         Invoice, on_delete=models.CASCADE, related_name="line_items"
     )
@@ -212,6 +220,7 @@ class LineItem(models.Model):
 
 
 class Credit(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     invoice = models.ForeignKey(
         Invoice, on_delete=models.CASCADE, related_name="credits"
     )
