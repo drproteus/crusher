@@ -1,7 +1,16 @@
 from django.db import models, transaction
 from decimal import Decimal
 from django.conf import settings
+from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
+from django.contrib.contenttypes.models import ContentType
 import uuid
+
+
+class Tag(models.Model):
+    value = models.CharField(max_length=256)
+    object_id = models.UUIDField()
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    content_object = GenericForeignKey("content_type", "object_id")
 
 
 class Client(models.Model):
@@ -14,6 +23,7 @@ class Client(models.Model):
     metadata = models.JSONField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    tags = GenericRelation(Tag)
 
     def __str__(self):
         return f"{self.company}[{self.id}]"
@@ -29,6 +39,7 @@ class Vessel(models.Model):
     metadata = models.JSONField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    tags = GenericRelation(Tag)
 
     def __str__(self):
         return f"{self.name}[{self.id}]"
@@ -51,6 +62,7 @@ class Request(models.Model):
     metadata = models.JSONField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    tags = GenericRelation(Tag)
 
     def __str__(self):
         return f"{self.state}|{self.client}|{self.created_at}|{self.id}"
@@ -65,6 +77,7 @@ class Job(models.Model):
     metadata = models.JSONField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    tags = GenericRelation(Tag)
 
     def __str__(self):
         return f"{self.vessel.name}|{self.created_at}|{self.id}"
@@ -137,6 +150,7 @@ class SKU(models.Model):
     units = models.CharField(blank=True, max_length=32, default="unit")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    tags = GenericRelation(Tag)
 
     staff = StaffManager()
     items = ItemManager()
@@ -180,6 +194,7 @@ class Invoice(models.Model):
     due_date = models.DateTimeField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    tags = GenericRelation(Tag)
 
     def __str__(self):
         return f"{self.state}|{self.created_at}|INITIAL:{self.initial_balance}|PAID:{self.paid_balance}|DUE:{self.due_date}|{self.id}"
@@ -218,6 +233,7 @@ class LineItem(models.Model):
     service_date = models.DateTimeField(auto_now_add=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    tags = GenericRelation(Tag)
 
     def __str__(self):
         return f"INV_ID:{self.invoice.id}|{self.created_at}|SUBTOTAL:{self.subtotal}|POSTED:{self.posted_date}|SERVICE:{self.service_date}|{self.id}"
@@ -240,10 +256,10 @@ class Credit(models.Model):
     posted_date = models.DateTimeField(auto_now_add=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    tags = GenericRelation(Tag)
 
     def __str__(self):
         return f"INV_ID:{self.invoice.id}|{self.created_at}|AMOUNT:{self.subtotal}|POSTED:{self.posted_date}|{self.id}"
-
 
 from django.contrib import admin
 
