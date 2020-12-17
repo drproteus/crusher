@@ -40,7 +40,7 @@ class Request(models.Model):
 
 
 class Job(models.Model):
-    vessel = models.ForeignKey(Vessel, on_delete=models.CASCADE, null=False)
+    vessel = models.ForeignKey(Vessel, on_delete=models.SET_NULL, null=True)
     origin_request = models.ForeignKey(Request, on_delete=models.SET_NULL, null=True)
     metadata = models.JSONField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -175,4 +175,3 @@ class Credit(models.Model):
     posted_date = models.DateTimeField(auto_now_add=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
