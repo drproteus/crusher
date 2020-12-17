@@ -12,7 +12,8 @@ services:
       MYSQL_PASSWORD: $MYSQL_PASSWORD
       MYSQL_DATABASE: crusher
     restart: unless-stopped
-    command: "gunicorn -b 0.0.0.0:8080 crusher.wsgi"
+    # command: "gunicorn -b 0.0.0.0:8080 crusher.wsgi"
+    command: "python manage.py runserver 0.0.0.0:8080"
     depends_on:
       - db
   # caddy:
