@@ -13,6 +13,9 @@ class Client(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    def __str__(self):
+        return f"{self.company}[{self.id}]"
+
 
 class Vessel(models.Model):
     name = models.CharField(max_length=256)
@@ -21,6 +24,9 @@ class Vessel(models.Model):
     metadata = models.JSONField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.name}[{self.id}]"
 
 
 class Request(models.Model):
@@ -38,6 +44,9 @@ class Request(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    def __str__(self):
+        return f"{self.state}|{self.client}|{self.created_at}|{self.id}"
+
 
 class Job(models.Model):
     vessel = models.ForeignKey(Vessel, on_delete=models.SET_NULL, null=True)
@@ -45,6 +54,9 @@ class Job(models.Model):
     metadata = models.JSONField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.vessel.name}|{self.created_at}|{self.id}"
 
 
 class SKUQuerySet(models.QuerySet):
@@ -125,6 +137,15 @@ class SKU(models.Model):
         li_kwargs["price"] = li_kwargs.get("price", self.default_price)
         return LineItem.objects.create(sku=self, invoice=invoice, **li_kwargs)
 
+    @property
+    def sku_type(self):
+        if self.metadata and self.metadata.get("type"):
+            return self.metadata["type"]
+        return "misc"
+
+    def __str__(self):
+        return f"{self.name}|{self.created_at}|{self.sku_type}|{self.id}"
+
 
 class Invoice(models.Model):
     class InvoiceState(models.IntegerChoices):
@@ -144,6 +165,9 @@ class Invoice(models.Model):
     due_date = models.DateTimeField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.state}|{self.created_at}|INITIAL:{self.initial_balance}|PAID:{self.paid_balance}|DUE:{self.due_date}|{self.id}"
 
     def get_initial_balance(self):
         return sum(self.line_items.all().values_list("subtotal", flat=True))
@@ -179,6 +203,9 @@ class LineItem(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    def __str__(self):
+        return f"INV_ID:{self.invoice.id}|{self.created_at}|SUBTOTAL:{self.subtotal}|POSTED:{self.posted_date}|SERVICE:{self.service_date}|{self.id}"
+
     def save(self, *args, **kwargs):
         self.subtotal = self.price * self.quantity
         return super().save()
@@ -194,6 +221,9 @@ class Credit(models.Model):
     posted_date = models.DateTimeField(auto_now_add=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"INV_ID:{self.invoice.id}|{self.created_at}|AMOUNT:{self.subtotal}|POSTED:{self.posted_date}|{self.id}"
 
 
 from django.contrib import admin
