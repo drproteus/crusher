@@ -65,6 +65,18 @@ class SKU(models.Model):
     default_price = models.DecimalField(
         default=Decimal(1.0), max_digits=32, decimal_places=2
     )
+    minium_quantity = models.DecimalField(
+        null=True, max_digits=32, decimal_places=2
+    )
+    minimum_price = models.DecimalField(
+        null=True, max_digits=32, decimal_places=2
+    )
+    maximum_quantity = models.DecimalField(
+        null=True, max_digits=32, decimal_places=2
+    )
+    maximum_price = models.DecimalField(
+        null=True, max_digits=32, decimal_places=2
+    )
     units = models.CharField(blank=True, max_length=32, default="unit")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
