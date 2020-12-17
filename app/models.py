@@ -3,6 +3,11 @@ from decimal import Decimal
 from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
+from app.metadata import (
+    StaffMetadataSchema,
+    ItemMetadataSchema,
+    TransportMetadataSchema,
+)
 import uuid
 
 
@@ -102,11 +107,9 @@ class StaffManager(SKUManager):
     def get_queryset(self):
         return super().get_queryset().filter(metadata__type="staff")
 
-    def create(self, staff_data, **sku_kwargs):
-        sku_kwargs["metadata"] = sku_kwargs.get("metadata", {"type": "staff"})
-        sku_kwargs["metadata"].update(staff_data)
+    def create(self, staff_data=None, **sku_kwargs):
         sku_kwargs["units"] = sku_kwargs.get("units", "hour")
-        # VALIDATE
+        sku_kwargs["metadata"] = StaffMetadataSchema().load(staff_data or {})
         return super().create(**sku_kwargs)
 
 
@@ -114,10 +117,8 @@ class ItemManager(SKUManager):
     def get_queryset(self):
         return super().get_queryset().filter(metadata__type="item")
 
-    def create(self, item_data, **sku_kwargs):
-        sku_kwargs["metadata"] = sku_kwargs.get("metadata", {"type": "item"})
-        sku_kwargs["metadata"].update(item_data)
-        # VALIDATE
+    def create(self, item_data=None, **sku_kwargs):
+        sku_kwargs["metadata"] = ItemMetadataSchema().load(item_data or {})
         return super().create(**sku_kwargs)
 
 
@@ -125,11 +126,9 @@ class TransportationManager(SKUManager):
     def get_queryset(self):
         return super().get_queryset().filter(metadata__type="transport")
 
-    def create(self, transport_data, **sku_kwargs):
-        sku_kwargs["metadata"] = sku_kwargs.get("metadata", {"type": "transport"})
-        sku_kwargs["metadata"].update(transport_data)
+    def create(self, transport_data=None, **sku_kwargs):
         sku_kwargs["units"] = sku_kwargs.get("units", "mile")
-        # VALIDATE
+        sku_kwargs["metadata"] = TransportMetadataSchema().load(transport_data or {})
         return super().create(**sku_kwargs)
 
 
@@ -260,6 +259,7 @@ class Credit(models.Model):
 
     def __str__(self):
         return f"INV_ID:{self.invoice.id}|{self.created_at}|AMOUNT:{self.subtotal}|POSTED:{self.posted_date}|{self.id}"
+
 
 from django.contrib import admin
 
