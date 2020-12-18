@@ -22,6 +22,9 @@ from app.models import (
     Vessel as VesselModel,
     Request as RequestModel,
     Job as JobModel,
+    ItemSKU as ItemSKUModel,
+    ServiceSKU as ServiceSKUModel,
+    TransportationSKU as TransportationSKUModel,
 )
 
 
@@ -368,8 +371,7 @@ class ModifySKUMutation(graphene.Mutation):
     sku = graphene.Field(SKU)
 
     @classmethod
-    def mutate(cls, root, info, id=None, metadata=None, **sku_kwargs):
-        sku_kwargs["metadata"] = SKUMetadataSchema().load(metadata or {})
+    def mutate(cls, root, info, id=None, **sku_kwargs):
         try:
             SKUModel.objects.filter(pk=id).update(**sku_kwargs)
             sku = SKUModel.objects.get(pk=id)
@@ -385,8 +387,7 @@ class ModifyItemMutation(graphene.Mutation):
     item = graphene.Field(SKU)
 
     @classmethod
-    def mutate(cls, root, info, id=None, metadata=None, **sku_kwargs):
-        sku_kwargs["metadata"] = ItemMetadataSchema().load(metadata or {})
+    def mutate(cls, root, info, id=None, **sku_kwargs):
         try:
             SKUModel.items.filter(pk=id).update(**sku_kwargs)
             sku = SKUModel.items.get(pk=id)
@@ -402,8 +403,7 @@ class ModifyServiceMutation(graphene.Mutation):
     staff = graphene.Field(SKU)
 
     @classmethod
-    def mutate(cls, root, info, id=None, metadata=None, **sku_kwargs):
-        sku_kwargs["metadata"] = ServiceMetadataSchema().load(metadata or {})
+    def mutate(cls, root, info, id=None, **sku_kwargs):
         try:
             SKUModel.staff.filter(pk=id).update(**sku_kwargs)
             sku = SKUModel.staff.get(pk=id)
@@ -419,8 +419,7 @@ class ModifyTransportationMutation(graphene.Mutation):
     transportation = graphene.Field(SKU)
 
     @classmethod
-    def mutate(cls, root, info, id=None, metadata=None, **sku_kwargs):
-        sku_kwargs["metadata"] = TransportMetadataSchema().load(metadata or {})
+    def mutate(cls, root, info, id=None, **sku_kwargs):
         try:
             SKUModel.transportation.filter(pk=id).update(**sku_kwargs)
             sku = SKUModel.transportation.get(pk=id)
@@ -604,13 +603,13 @@ class Query(graphene.ObjectType):
         return SKUModel.objects.all()
 
     def resolve_transport_skus(self, info):
-        return SKUModel.transportation.all()
+        return TransportationSKUModel.objects.all()
 
     def resolve_service_skus(self, info):
-        return SKUModel.services.all()
+        return ServiceSKUModel.objects.all()
 
     def resolve_item_skus(self, info):
-        return SKUModel.items.all()
+        return ItemSKUModel.objects.all()
 
     def resolve_clients(self, info):
         return ClientModel.objects.all()

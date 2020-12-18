@@ -167,9 +167,6 @@ class SKU(models.Model):
     contacts = models.ManyToManyField(Contact, related_name="skus")
     related_skus = models.ManyToManyField("self")
 
-    services = ServiceManager()
-    items = ItemManager()
-    transportation = TransportationManager()
     objects = SKUManager()
 
     def add_to_invoice(self, invoice, **li_kwargs):
@@ -186,6 +183,46 @@ class SKU(models.Model):
 
     def __str__(self):
         return f"{self.name}|{self.created_at}|{self.sku_type}|{self.id}"
+
+
+class ServiceSKU(SKU):
+    class Meta:
+        proxy = True
+
+    objects = ServiceManager()
+
+    def save(self, *args, **kwargs):
+        self.metadata = ServiceMetadataSchema().load(
+            self.metadata or {"type": "service"}
+        )
+        super().save(*args, **kwargs)
+
+
+
+class ItemSKU(SKU):
+    class Meta:
+        proxy = True
+
+    objects = ItemManager()
+
+    def save(self, *args, **kwargs):
+        self.metadata = ItemMetadataSchema().load(
+            self.metadata or {"type": "item"}
+        )
+        super().save(*args, **kwargs)
+
+
+class TransportationSKU(SKU):
+    class Meta:
+        proxy = True
+
+    objects = TransportationManager()
+
+    def save(self, *args, **kwargs):
+        self.metadata = ItemMetadataSchema().load(
+            self.metadata or {"type": "transport"}
+        )
+        super().save(*args, **kwargs)
 
 
 class Invoice(models.Model):
