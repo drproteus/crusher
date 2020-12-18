@@ -506,6 +506,52 @@ class GenerateInvoicePreviewMutation(graphene.Mutation):
         return GenerateInvoicePreviewMutation(url=f"/INVOICE-{invoice.id}.pdf")
 
 
+METADATA_MODELS = (
+    ClientModel,
+    ContactModel,
+    VesselModel,
+    JobModel,
+    RequestModel,
+    SKUModel,
+    InvoiceModel,
+    LineItemModel,
+)
+
+
+class ModifyMetadataMutation(graphene.Mutation):
+    class Arguments:
+        id = graphene.ID(required=True)
+        metadata = generic.GenericScalar(required=True)
+        mode = graphene.String()
+
+    metadata = generic.GenericScalar()
+    id = graphene.UUID()
+    parent_type = graphene.String()
+    mode = graphene.String()
+
+    @classmethod
+    def mutate(cls, root, info, id, metadata, mode="update"):
+        for m in METADATA_MODELS:
+            try:
+                o = m.objects.get(pk=id)
+                break
+            except m.DoesNotExist:
+                pass
+        else:
+            raise Exception(f"Object with UUID {id} not found")
+        initial = o.metadata
+        if mode == "update":
+            initial.update(metadata)
+            o.metadata = initial
+        elif mode == "replace":
+            o.metadata = metadata
+        o.save()
+        final = o.metadata
+        return ModifyMetadataMutation(
+            id=id, metadata=final, parent_type=o.__class__.__name__, mode=mode
+        )
+
+
 class Mutations(graphene.ObjectType):
     modify_contact = ModifyContactMutation.Field()
     modify_contact_connection = ModifyClientConnectionMutation.Field()
@@ -515,6 +561,7 @@ class Mutations(graphene.ObjectType):
     modify_vessel = ModifyVesselMutation.Field()
     modify_job = ModifyJobMutation.Field()
     modify_sku = ModifySKUMutation.Field()
+    modify_metadata = ModifyMetadataMutation.Field()
 
     begin_invoice = BeginInvoiceMutation.Field()
     set_invoice_state = SetInvoiceStateMutation.Field()
