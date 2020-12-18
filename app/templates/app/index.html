@@ -1,7 +1,12 @@
 {% load static %}
 <html>
 
-<body id="root"></body>
+<body>
+    {% csrf_token %}
+    <div id="root">
+
+    </div>
+</body>
 <script src="{% static 'js/index.js' %}"></script>
 
 </html>

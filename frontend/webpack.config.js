@@ -9,10 +9,13 @@ const bundleName = 'js/[name].js';
 const imgName = 'img/[name].[ext]';
 
 module.exports = {
-  entry: {index: entryFile},
+  entry: { index: entryFile },
   output: {
     path: outputDir,
     filename: bundleName,
+  },
+  optimization: {
+    minimize: false
   },
   module: {
     rules: [
