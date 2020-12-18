@@ -1,13 +1,19 @@
 {
-  "name": "crusher-frontend",
+  "name": "client",
   "version": "1.0.0",
-  "description": "react frontend for crusher API",
   "main": "index.js",
-  "repository": "https://github.com/drproteus/crusher",
-  "author": "Jake Goritski",
-  "license": "Copyright 2020 Jake Goritski",
-  "private": true,
+  "license": "MIT",
   "dependencies": {
-    "react": "^17.0.1"
+    "@babel/core": "^7.4.4",
+    "@babel/preset-react": "^7.0.0",
+    "babel-loader": "^8.0.5",
+    "file-loader": "^3.0.1",
+    "react": "^16.8.6",
+    "react-dom": "^16.8.6",
+    "webpack": "^4.30.0",
+    "webpack-cli": "^3.3.2"
+  },
+  "scripts": {
+    "build": "webpack-cli --config webpack.config.js --mode none --watch"
   }
 }
