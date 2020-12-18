@@ -6,13 +6,11 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('app', '0013_delete_tag'),
+        ("app", "0013_delete_tag"),
     ]
 
     operations = [
         migrations.RenameField(
-            model_name='sku',
-            old_name='minium_quantity',
-            new_name='minimum_quantity',
+            model_name="sku", old_name="minium_quantity", new_name="minimum_quantity",
         ),
     ]

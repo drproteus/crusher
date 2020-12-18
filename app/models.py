@@ -29,7 +29,12 @@ class Client(models.Model):
 class Vessel(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=256)
-    mmsi = models.CharField(max_length=9, blank=True, default="", help_text="Maritime Mobile Service Identity")
+    mmsi = models.CharField(
+        max_length=9,
+        blank=True,
+        default="",
+        help_text="Maritime Mobile Service Identity",
+    )
     client = models.ForeignKey(
         Client, on_delete=models.CASCADE, null=False, related_name="vessels"
     )

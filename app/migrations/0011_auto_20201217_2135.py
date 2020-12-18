@@ -6,13 +6,11 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('app', '0010_auto_20201217_2135'),
+        ("app", "0010_auto_20201217_2135"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='invoice',
-            name='metadata',
-            field=models.JSONField(null=True),
+            model_name="invoice", name="metadata", field=models.JSONField(null=True),
         ),
     ]

@@ -7,18 +7,23 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('app', '0009_tag'),
+        ("app", "0009_tag"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='invoice',
-            name='client',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='invoices', to='app.client'),
+            model_name="invoice",
+            name="client",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="invoices",
+                to="app.client",
+            ),
         ),
         migrations.AddField(
-            model_name='invoice',
-            name='metadata',
+            model_name="invoice",
+            name="metadata",
             field=models.JSONField(default={}),
             preserve_default=False,
         ),
