@@ -1,6 +1,9 @@
 from graphene_django import DjangoObjectType
 import graphene
+from graphene import relay
 from graphene.types import generic
+from graphene_django.filter import DjangoFilterConnectionField
+import django_filters
 
 from app.metadata import (
     SKUMetadataSchema,
@@ -84,6 +87,13 @@ class Job(DjangoObjectType):
 class SKU(DjangoObjectType):
     class Meta:
         model = SKUModel
+
+    metadata = generic.GenericScalar()
+
+
+class ServiceSKU(DjangoObjectType):
+    class Meta:
+        model = ServiceSKUModel
 
     metadata = generic.GenericScalar()
 
@@ -389,10 +399,10 @@ class ModifyItemMutation(graphene.Mutation):
     @classmethod
     def mutate(cls, root, info, id=None, **sku_kwargs):
         try:
-            SKUModel.items.filter(pk=id).update(**sku_kwargs)
-            sku = SKUModel.items.get(pk=id)
-        except SKUModel.DoesNotExist:
-            sku = SKUModel.items.create(**sku_kwargs)
+            ItemSKUModel.objects.filter(pk=id).update(**sku_kwargs)
+            sku = ItemSKUModel.items.get(pk=id)
+        except ItemSKUModel.DoesNotExist:
+            sku = ItemSKUModel.objects.create(**sku_kwargs)
         return ModifyItemMutation(item=sku)
 
 
@@ -400,16 +410,16 @@ class ModifyServiceMutation(graphene.Mutation):
     class Arguments(SKUArguments):
         pass
 
-    staff = graphene.Field(SKU)
+    service = graphene.Field(SKU)
 
     @classmethod
     def mutate(cls, root, info, id=None, **sku_kwargs):
         try:
-            SKUModel.staff.filter(pk=id).update(**sku_kwargs)
-            sku = SKUModel.staff.get(pk=id)
-        except SKUModel.DoesNotExist:
-            sku = SKUModel.staff.create(**sku_kwargs)
-        return ModifyServiceMutation(staff=sku)
+            ServiceSKUModel.objects.filter(pk=id).update(**sku_kwargs)
+            sku = ServiceSKUModel.objects.get(pk=id)
+        except ServiceSKUModel.DoesNotExist:
+            sku = ServiceSKUModel.objects.create(**sku_kwargs)
+        return ModifyServiceMutation(service=sku)
 
 
 class ModifyTransportationMutation(graphene.Mutation):
@@ -421,10 +431,10 @@ class ModifyTransportationMutation(graphene.Mutation):
     @classmethod
     def mutate(cls, root, info, id=None, **sku_kwargs):
         try:
-            SKUModel.transportation.filter(pk=id).update(**sku_kwargs)
-            sku = SKUModel.transportation.get(pk=id)
-        except SKUModel.DoesNotExist:
-            sku = SKUModel.transportation.create(**sku_kwargs)
+            TransportationSKUModel.objects.filter(pk=id).update(**sku_kwargs)
+            sku = TransportationSKUModel.objects.get(pk=id)
+        except TransportationSKUModel.DoesNotExist:
+            sku = TransportationSKUModel.objects.create(**sku_kwargs)
         return ModifyTransportationMutation(transportation=sku)
 
 
@@ -587,35 +597,91 @@ class Mutations(graphene.ObjectType):
     delete_credit = DeleteCreditMutation.Field()
 
 
+class InvoiceNode(DjangoObjectType):
+    class Meta:
+        model = InvoiceModel
+        interfaces = (relay.Node,)
+        filter_fields = {
+            "id": ["exact", "icontains"],
+            "client": ["exact"],
+            "state": ["exact", "gt", "lt"],
+            "initial_balance": ["exact", "gt", "lt"],
+            "paid_balance": ["exact", "gt", "lt"],
+        }
+
+    invoice_id = graphene.UUID(source="pk")
+    metadata = generic.GenericScalar()
+
+
+class SKUNode(DjangoObjectType):
+    class Meta:
+        model = SKUModel
+        interfaces = (relay.Node,)
+        filter_fields = {
+            "id": ["exact"],
+            "name": ["exact", "icontains"],
+        }
+
+    sku_id = graphene.UUID(source="pk")
+    metadata = generic.GenericScalar()
+
+
+class ContactNode(DjangoObjectType):
+    class Meta:
+        model = ContactModel
+        interfaces = (relay.Node,)
+        filter_fields = {
+            "id": ["exact"],
+            "first_name": ["exact", "icontains"],
+            "last_name": ["exact", "icontains"],
+            "role": ["exact", "icontains"],
+            "billing_address": ["icontains"],
+            "mailing_address": ["icontains"],
+            "primary_email": ["exact", "icontains"],
+        }
+
+    contact_id = graphene.UUID(source="pk")
+    name = graphene.String(source="name")
+    fullname = graphene.String(source="fullname")
+    metadata = generic.GenericScalar()
+
+
+class ClientNode(DjangoObjectType):
+    class Meta:
+        model = ClientModel
+        interfaces = (relay.Node,)
+        filter_fields = {"id": ["exact"], "company": ["exact", "icontains"]}
+
+    client_id = graphene.UUID(source="pk")
+    metadata = generic.GenericScalar()
+
+
 class Query(graphene.ObjectType):
-    invoices = graphene.List(Invoice)
-    skus = graphene.List(SKU)
-    transport_skus = graphene.List(SKU)
-    service_skus = graphene.List(SKU)
-    item_skus = graphene.List(SKU)
-    clients = graphene.List(Client)
-    contacts = graphene.List(Contact)
+    invoices = DjangoFilterConnectionField(InvoiceNode)
+    skus = DjangoFilterConnectionField(SKUNode)
+    clients = DjangoFilterConnectionField(ClientNode)
+    contacts = DjangoFilterConnectionField(ContactNode)
 
-    def resolve_invoices(self, info):
-        return InvoiceModel.objects.all()
+    invoice = graphene.Field(Invoice, id=graphene.ID(required=True))
+    sku = graphene.Field(SKU, id=graphene.ID(required=True))
+    service_sku = graphene.Field(ServiceSKU, id=graphene.ID(required=True))
+    client = graphene.Field(Client, id=graphene.ID(required=True))
+    contact = graphene.Field(Contact, id=graphene.ID(required=True))
 
-    def resolve_skus(self, info):
-        return SKUModel.objects.all()
+    def resolve_invoice(root, info, id):
+        return InvoiceModel.objects.get(pk=id)
 
-    def resolve_transport_skus(self, info):
-        return TransportationSKUModel.objects.all()
+    def resolve_sku(root, info, id):
+        return SKUModel.objects.get(pk=id)
 
-    def resolve_service_skus(self, info):
-        return ServiceSKUModel.objects.all()
+    def resolve_service_sku(root, info, id):
+        return ServiceSKUModel.objects.get(pk=id)
 
-    def resolve_item_skus(self, info):
-        return ItemSKUModel.objects.all()
+    def resolve_client(root, info, id):
+        return ClientModel.objects.get(pk=id)
 
-    def resolve_clients(self, info):
-        return ClientModel.objects.all()
-
-    def resolve_contacts(self, info):
-        return ContactModel.objects.all()
+    def resolve_contact(root, info, id):
+        return ContactModel.objects.get(pk=id)
 
 
 schema = graphene.Schema(query=Query, mutation=Mutations)
