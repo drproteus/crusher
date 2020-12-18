@@ -575,40 +575,52 @@ class Mutations(graphene.ObjectType):
     delete_credit = DeleteCreditMutation.Field()
 
 
+class InvoiceFilterSet(django_filters.FilterSet):
+    class Meta:
+        model = InvoiceModel
+        exclude = ["metadata"]
+
+
 class InvoiceNode(DjangoObjectType):
     class Meta:
         model = InvoiceModel
         interfaces = (relay.Node,)
-        filter_fields = {
-            "id": ["exact", "icontains"],
-            "client": ["exact"],
-            "state": ["exact", "gt", "lt"],
-            "initial_balance": ["exact", "gt", "lt"],
-            "paid_balance": ["exact", "gt", "lt"],
-        }
+        filterset_class = InvoiceFilterSet
 
     invoice_id = graphene.UUID(source="pk")
     metadata = generic.GenericScalar()
+
+
+class SKUFilterSet(django_filters.FilterSet):
+    class Meta:
+        model = SKUModel
+        exclude = ["metadata"]
+
+    tag = django_filters.CharFilter(method="tag_filter")
+    sku_type = django_filters.CharFilter(method="type_filter")
+
+    def tag_filter(self, queryset, name, value):
+        return queryset.filter(metadata__tag=value)
+
+    def type_filter(self, queryset, name, value):
+        return queryset.filter(metadata__type=value)
 
 
 class SKUNode(DjangoObjectType):
     class Meta:
         model = SKUModel
         interfaces = (relay.Node,)
-        filter_fields = {
-            "id": ["exact"],
-            "name": ["exact", "icontains"],
-        }
+        filterset_class = SKUFilterSet
 
     sku_id = graphene.UUID(source="pk")
     metadata = generic.GenericScalar()
 
 
-class ContactNode(DjangoObjectType):
+class ContactFilterSet(django_filters.FilterSet):
     class Meta:
         model = ContactModel
-        interfaces = (relay.Node,)
-        filter_fields = {
+        exclude = ["metadata"]
+        fields = {
             "id": ["exact"],
             "first_name": ["exact", "icontains"],
             "last_name": ["exact", "icontains"],
@@ -617,6 +629,12 @@ class ContactNode(DjangoObjectType):
             "mailing_address": ["icontains"],
             "primary_email": ["exact", "icontains"],
         }
+
+class ContactNode(DjangoObjectType):
+    class Meta:
+        model = ContactModel
+        interfaces = (relay.Node,)
+        filterset_class = ContactFilterSet
 
     contact_id = graphene.UUID(source="pk")
     name = graphene.String(source="name")
