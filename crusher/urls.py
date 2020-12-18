@@ -17,10 +17,12 @@ from django.contrib import admin
 from django.urls import path
 from django.conf import settings
 from django.conf.urls.static import static
+from django.views.generic.base import TemplateView
 
 from graphene_django.views import GraphQLView
 
 urlpatterns = [
+    path("", TemplateView.as_view(template_name="app/index.html")),
     path("admin/", admin.site.urls),
     path("graphql", GraphQLView.as_view(graphiql=True)),
 ]

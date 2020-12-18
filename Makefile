@@ -3,7 +3,7 @@ build:
 
 collectstatic:
 	mkdir -p static
-	# docker-compose run -u "`id -u`:`id -g`" --rm web python manage.py collectstatic --no-input
+	cd frontend && yarn webpack && cd -
 	docker-compose run --no-deps --rm web python manage.py collectstatic --no-input
 
 makemigrations:

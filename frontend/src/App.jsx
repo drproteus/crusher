@@ -1,21 +1,20 @@
-import React, {Fragment} from 'react';
+import React, { Fragment } from 'react';
 import ReactDOM from 'react-dom';
 
-import dinoImg from '../img/dinocorn.jpg';
+import { ApolloProvider } from '@apollo/react-hooks';
 
-const HelloWorldApp = props => (
-  <Fragment>
-    <h1>Hello World from React and Django</h1>
+import ApolloClient from 'apollo-boost';
+
+const client = new ApolloClient({
+  uri: '/graphql',
+});
+
+const App = () => (
+  <ApolloProvider client={client}>
     <div>
-      <span>Passed props:</span>
-      {JSON.stringify(props)}
+      <h2>My first Apollo app 🚀</h2>
     </div>
-    <img src={dinoImg} />
-  </Fragment>
+  </ApolloProvider>
 );
 
-window.renderApp = props =>
-  ReactDOM.render(
-    <HelloWorldApp {...props} />,
-    document.getElementById('react-container'),
-  );
+ReactDOM.render(<App />, document.getElementById('root'));
