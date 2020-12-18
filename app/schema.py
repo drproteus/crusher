@@ -260,7 +260,7 @@ class SKUMutation(graphene.Mutation):
             SKUModel.objects.filter(pk=id).update(**sku_kwargs)
             sku = SKUModel.objects.get(pk=id)
         except SKUModel.DoesNotExist:
-            SKUModel.objects.create(**sku_kwargs)
+            sku = SKUModel.objects.create(**sku_kwargs)
         return SKUMutation(sku=sku)
 
 
@@ -278,7 +278,7 @@ class ItemMutation(graphene.Mutation):
             SKUModel.items.filter(pk=id).update(**sku_kwargs)
             sku = SKUModel.items.get(pk=id)
         except SKUModel.DoesNotExist:
-            SKUModel.items.create(**sku_kwargs)
+            sku = SKUModel.items.create(**sku_kwargs)
         return ItemMutation(item=sku)
 
 
@@ -296,7 +296,7 @@ class StaffMutation(graphene.Mutation):
             SKUModel.staff.filter(pk=id).update(**sku_kwargs)
             sku = SKUModel.staff.get(pk=id)
         except SKUModel.DoesNotExist:
-            SKUModel.staff.create(**sku_kwargs)
+            sku = SKUModel.staff.create(**sku_kwargs)
         return StaffMutation(staff=sku)
 
 
@@ -314,7 +314,7 @@ class TransportationMutation(graphene.Mutation):
             SKUModel.transportation.filter(pk=id).update(**sku_kwargs)
             sku = SKUModel.transportation.get(pk=id)
         except SKUModel.DoesNotExist:
-            SKUModel.transportation.create(**sku_kwargs)
+            sku = SKUModel.transportation.create(**sku_kwargs)
         return TransportationMutation(transportation=sku)
 
 
