@@ -30,6 +30,14 @@ class Contact(DjangoObjectType):
         model = ContactModel
 
     metadata = generic.GenericScalar()
+    name = graphene.String()
+    fullname = graphene.String()
+
+    def resolve_name(self, info):
+        return self.name
+
+    def resolve_fullname(self, info):
+        return self.fullname
 
 
 class Client(DjangoObjectType):
@@ -297,6 +305,49 @@ class ModifyJobMutation(graphene.Mutation):
         return ModifyJobMutation(job=job)
 
 
+class ModifySKURelationMutation(graphene.Mutation):
+    class Arguments:
+        s1_id = graphene.UUID(required=True)
+        s2_id = graphene.UUID(required=True)
+        action = graphene.String()
+
+    ok = graphene.Boolean()
+
+    @classmethod
+    def mutate(cls, root, info, s1_id, s2_id, action="link"):
+        s1 = SKUModel.objects.get(pk=s1_id)
+        s2 = SKUModel.objects.get(pk=s2_id)
+        if action == "link":
+            s1.related_skus.add(s2)
+            return ModifySKURelationMutation(ok=True)
+        elif action == "unlink":
+            s1.related_skus.remove(s2)
+            return ModifySKURelationMutation(ok=True)
+        return ModifySKURelationMutation(ok=False)
+
+
+class ModifySKUContactRelationMutation(graphene.Mutation):
+    class Arguments:
+        contact_id = graphene.UUID(required=True)
+        sku_id = graphene.UUID(required=True)
+        action = graphene.String()
+
+    ok = graphene.Boolean()
+
+    @classmethod
+    def mutate(cls, root, info, contact_id, sku_id, action="link"):
+        contact = ContactModel.objects.get(pk=contact_id)
+        sku = SKUModel.objects.get(pk=sku_id)
+        if action == "link":
+            contact.skus.add(sku)
+            return ModifySKUContactRelationMutation(ok=True)
+        elif action == "unlink":
+            contact.skus.remove(sku)
+            sku.contacts.remove(contact)
+            return ModifySKUContactRelationMutation(ok=True)
+        return ModifySKUContactRelationMutation(ok=False)
+
+
 class SKUArguments:
     id = graphene.ID()
     metadata = generic.GenericScalar()
@@ -344,7 +395,7 @@ class ModifyItemMutation(graphene.Mutation):
         return ModifyItemMutation(item=sku)
 
 
-class ModifyStaffMutation(graphene.Mutation):
+class ModifyServiceMutation(graphene.Mutation):
     class Arguments(SKUArguments):
         pass
 
@@ -352,13 +403,13 @@ class ModifyStaffMutation(graphene.Mutation):
 
     @classmethod
     def mutate(cls, root, info, id=None, metadata=None, **sku_kwargs):
-        sku_kwargs["metadata"] = StaffMetadataSchema().load(metadata or {})
+        sku_kwargs["metadata"] = ServiceMetadataSchema().load(metadata or {})
         try:
             SKUModel.staff.filter(pk=id).update(**sku_kwargs)
             sku = SKUModel.staff.get(pk=id)
         except SKUModel.DoesNotExist:
             sku = SKUModel.staff.create(**sku_kwargs)
-        return ModifyStaffMutation(staff=sku)
+        return ModifyServiceMutation(staff=sku)
 
 
 class ModifyTransportationMutation(graphene.Mutation):
@@ -513,12 +564,16 @@ class GenerateInvoicePreviewMutation(graphene.Mutation):
 
 
 class Mutations(graphene.ObjectType):
+    modify_contact = ModifyContactMutation.Field()
+    modify_contact_connection = ModifyClientConnectionMutation.Field()
+    modify_sku_relation = ModifySKURelationMutation.Field()
+    modify_sku_contact_relation = ModifySKUContactRelationMutation.Field()
     modify_client = ModifyClientMutation.Field()
     modify_vessel = ModifyVesselMutation.Field()
     modify_job = ModifyJobMutation.Field()
     modify_sku = ModifySKUMutation.Field()
     modify_item = ModifyItemMutation.Field()
-    modify_staff = ModifyStaffMutation.Field()
+    modify_service = ModifyServiceMutation.Field()
     modify_transportation = ModifyTransportationMutation.Field()
 
     begin_invoice = BeginInvoiceMutation.Field()
@@ -537,9 +592,10 @@ class Query(graphene.ObjectType):
     invoices = graphene.List(Invoice)
     skus = graphene.List(SKU)
     transport_skus = graphene.List(SKU)
-    staff_skus = graphene.List(SKU)
+    service_skus = graphene.List(SKU)
     item_skus = graphene.List(SKU)
     clients = graphene.List(Client)
+    contacts = graphene.List(Contact)
 
     def resolve_invoices(self, info):
         return InvoiceModel.objects.all()
@@ -550,14 +606,17 @@ class Query(graphene.ObjectType):
     def resolve_transport_skus(self, info):
         return SKUModel.transportation.all()
 
-    def resolve_staff_skus(self, info):
-        return SKUModel.staff.all()
+    def resolve_service_skus(self, info):
+        return SKUModel.services.all()
 
     def resolve_item_skus(self, info):
         return SKUModel.items.all()
 
     def resolve_clients(self, info):
         return ClientModel.objects.all()
+
+    def resolve_contacts(self, info):
+        return ContactModel.objects.all()
 
 
 schema = graphene.Schema(query=Query, mutation=Mutations)

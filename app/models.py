@@ -164,6 +164,9 @@ class SKU(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    contacts = models.ManyToManyField(Contact, related_name="skus")
+    related_skus = models.ManyToManyField("self")
+
     services = ServiceManager()
     items = ItemManager()
     transportation = TransportationManager()
