@@ -1,0 +1,13 @@
+{
+  "name": "crusher-frontend",
+  "version": "1.0.0",
+  "description": "react frontend for crusher API",
+  "main": "index.js",
+  "repository": "https://github.com/drproteus/crusher",
+  "author": "Jake Goritski",
+  "license": "Copyright 2020 Jake Goritski",
+  "private": true,
+  "dependencies": {
+    "react": "^17.0.1"
+  }
+}
