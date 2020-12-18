@@ -2,6 +2,15 @@ from graphene_django import DjangoObjectType
 import graphene
 from graphene.types import generic
 
+from app.metadata import (
+    SKUMetadataSchema,
+    StaffMetadataSchema,
+    TransportMetadataSchema,
+    TransportPointSchema,
+    VoyagePointSchema,
+    ItemMetadataSchema,
+)
+
 
 from app.models import (
     Invoice as InvoiceModel,
@@ -12,30 +21,17 @@ from app.models import (
     Vessel as VesselModel,
     Request as RequestModel,
     Job as JobModel,
-    Tag as TagModel,
 )
 
 
-class Tag(DjangoObjectType):
-    class Meta:
-        model = TagModel
-
-
-class Taggable:
-    tags = graphene.List(Tag)
-
-    def resolve_tags(self, info):
-        return self.tags.all()
-
-
-class Client(DjangoObjectType, Taggable):
+class Client(DjangoObjectType):
     class Meta:
         model = ClientModel
 
     metadata = generic.GenericScalar()
 
 
-class Vessel(DjangoObjectType, Taggable):
+class Vessel(DjangoObjectType):
     class Meta:
         model = VesselModel
 
@@ -46,7 +42,7 @@ class Vessel(DjangoObjectType, Taggable):
         return self.client
 
 
-class Request(DjangoObjectType, Taggable):
+class Request(DjangoObjectType):
     class Meta:
         model = RequestModel
 
@@ -57,7 +53,7 @@ class Request(DjangoObjectType, Taggable):
         return self.client
 
 
-class Job(DjangoObjectType, Taggable):
+class Job(DjangoObjectType):
     class Meta:
         model = JobModel
 
@@ -66,14 +62,14 @@ class Job(DjangoObjectType, Taggable):
     metadata = generic.GenericScalar()
 
 
-class SKU(DjangoObjectType, Taggable):
+class SKU(DjangoObjectType):
     class Meta:
         model = SKUModel
 
     metadata = generic.GenericScalar()
 
 
-class LineItem(DjangoObjectType, Taggable):
+class LineItem(DjangoObjectType):
     class Meta:
         model = LineItemModel
 
@@ -83,12 +79,12 @@ class LineItem(DjangoObjectType, Taggable):
         return self.sku
 
 
-class Credit(DjangoObjectType, Taggable):
+class Credit(DjangoObjectType):
     class Meta:
         model = CreditModel
 
 
-class Invoice(DjangoObjectType, Taggable):
+class Invoice(DjangoObjectType):
     class Meta:
         model = InvoiceModel
 
@@ -124,41 +120,6 @@ class Invoice(DjangoObjectType, Taggable):
         return self.line_items.filter(sku__metadata__type="item")
 
 
-class TagMutation(graphene.Mutation):
-    class Arguments:
-        value = graphene.String(required=True)
-        object_id = graphene.UUID(required=True)
-
-    tag = graphene.Field(lambda: Tag)
-
-    TAGGABLE_MODELS = (ClientModel, VesselModel, InvoiceModel, SKUModel, JobModel)
-
-    @classmethod
-    def mutate(cls, root, info, value, object_id):
-        for m in cls.TAGGABLE_MODELS:
-            try:
-                content_object = m.objects.get(pk=object_id)
-                break
-            except m.DoesNotExist:
-                pass
-        else:
-            raise Exception("Item not found")
-        t = content_object.tags.create(value=value)
-        return TagMutation(tag=t)
-
-
-class UntagMutation(graphene.Mutation):
-    class Arguments:
-        id = graphene.UUID(required=True)
-
-    ok = graphene.Boolean()
-
-    @classmethod
-    def mutate(cls, root, info, id):
-        TagModel.objects.filter(pk=id).delete()
-        return UntagMutation(ok=True)
-
-
 class ClientMutation(graphene.Mutation):
     class Arguments:
         company = graphene.String(required=True)
@@ -166,8 +127,7 @@ class ClientMutation(graphene.Mutation):
         mobile = graphene.String()
         mailing_address = graphene.String()
         billing_address = graphene.String()
-        tags = graphene.List(graphene.String)
-        metadata = generic.GenericScalar(required=False)
+        metadata = generic.GenericScalar()
         id = graphene.ID()
 
     client = graphene.Field(lambda: Client)
@@ -182,12 +142,10 @@ class ClientMutation(graphene.Mutation):
         mobile="",
         mailing_address="",
         billing_address="",
-        tags=None,
         metadata=None,
         id=None,
     ):
         try:
-            client = ClientModel.objects.get(pk=id)
             ClientModel.objects.filter(pk=id).update(
                 company=company,
                 email=email,
@@ -206,15 +164,40 @@ class ClientMutation(graphene.Mutation):
                 billing_address=billing_address,
                 metadata=metadata,
             )
-        for tag in (tags or []):
-            client.tags.create(value=tag)
+        metadata = metadata or {}
         return ClientMutation(client=client)
 
 
+class VesselMutation(graphene.Mutation):
+    class Arguments:
+        name = graphene.String(required=True)
+        client_id = graphene.String(required=True)
+        mmsi = graphene.String()
+        metadata = generic.GenericScalar()
+        id = graphene.ID()
+
+    vessel = graphene.Field(lambda: Vessel)
+
+    @classmethod
+    def mutate(
+        cls, root, info, name, client_id, mmsi="", metadata=None, id=None
+    ):
+        try:
+            VesselModel.objects.filter(pk=id, client_id=client_id).update(
+                name=name, mmsi=mmsi, metadata=metadata
+            )
+            vessel = VesselModel.objects.get(pk=id, client_id=client_id)
+        except VesselModel.DoesNotExist:
+            vessel = VesselModel.objects.create(
+                name=name, client_id=client_id, mmsi=mmsi, metadata=metadata
+            )
+        metadata = metadata or {}
+        return VesselMutation(vessel=vessel)
+
+
 class Mutations(graphene.ObjectType):
-    create_client = ClientMutation.Field()
-    add_tag = TagMutation.Field()
-    remove_tag = UntagMutation.Field()
+    modify_client = ClientMutation.Field()
+    modify_vessel = VesselMutation.Field()
 
 
 class Query(graphene.ObjectType):
