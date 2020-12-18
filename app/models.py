@@ -83,11 +83,11 @@ class Job(models.Model):
 
 
 class SKUQuerySet(models.QuerySet):
-    def add_to_invoice(self, invoice):
+    def add_to_invoice(self, invoice, **li_kwargs):
         new_line_item_ids = set()
         with transaction.atomic():
             for sku in self.all():
-                li = sku.add_to_invoice(invoice)
+                li = sku.add_to_invoice(invoice, **li_kwargs)
                 new_line_item_ids.add(li.id)
         return LineItem.objects.filter(id__in=new_line_item_ids)
 

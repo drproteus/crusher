@@ -310,9 +310,8 @@ class ModifyTransportationMutation(graphene.Mutation):
         return ModifyTransportationMutation(transportation=sku)
 
 
-class ModifyInvoiceMutation(graphene.Mutation):
+class BeginInvoiceMutation(graphene.Mutation):
     class Arguments:
-        id = graphene.ID()
         job_id = graphene.String()
         due_date = graphene.DateTime()
         metadata = generic.GenericScalar()
@@ -320,19 +319,129 @@ class ModifyInvoiceMutation(graphene.Mutation):
     invoice = graphene.Field(Invoice)
 
     @classmethod
-    def mutate(
-        cls, root, info, id=None, job_id=None, state=0, due_date=None, metadata=None
-    ):
+    def mutate(cls, root, info, job_id=None, due_date=None, metadata=None):
         metadata = metadata or {}
-        try:
-            invoice = InvoiceModel.objects.filter(pk=id).update(
-                state=state, due_date=due_date, metadata=metadata
-            )
-        except InvoiceModel.DoesNotExist:
-            invoice = InvoiceModel.objects.create(
-                state=state, due_date=due_date, metadate=metadata
-            )
-        return ModifyInvoiceMutation(invoice=invoice)
+        invoice = InvoiceModel.objects.create(
+            due_date=due_date, metadate=metadata, job_id=job_id
+        )
+        return BeginInvoiceMutation(invoice=invoice)
+
+
+class SetInvoiceStateMutation(graphene.Mutation):
+    class Arguments:
+        id = graphene.ID(required=True)
+        state = graphene.Int(required=True)
+
+    invoice = graphene.Field(Invoice)
+
+    @classmethod
+    def mutate(cls, root, info, id, state):
+        invoice = Invoice.models.get(pk=id)
+        invoice.state = state
+        invoice.save()
+        return SetInvoiceStateMutation(invoice=invoice)
+
+
+class SetInvoiceMetadataMutation(graphene.Mutation):
+    class Arguments:
+        id = graphene.ID(required=True)
+        metadata = generic.GenericScalar(required=True)
+
+    invoice = graphene.Field(Invoice)
+
+    @classmethod
+    def mutate(cls, root, info, id, metadata):
+        invoice = Invoice.models.get(pk=id)
+        invoice.metadata = metadata
+        invoice.save()
+        return SetInvoiceMetadataMutation(invoice=invoice)
+
+
+class AddLineItemMutation(graphene.Mutation):
+    class Arguments:
+        invoice_id = graphene.ID(required=True)
+        sku_id = graphene.String(required=True)
+        price = graphene.Float()
+        quantity = graphene.Float()
+
+    line_item = graphene.Field(LineItem)
+
+    @classmethod
+    def mutate(cls, root, info, invoice_id, sku_id, price=None, quantity=None):
+        li_kwargs = {}
+        if price:
+            li_kwargs["price"] = price
+        if quantity:
+            li_kwargs["quantity"] = quantity
+        invoice = InvoiceModel.objects.get(pk=invoice_id)
+        sku = SKU.objects.get(pk=sku_id)
+        sku.add_to_invoice(invoice, **li_kwargs)
+        invoice.update_balances()
+        return AddLineItemMutation(invoice=invoice)
+
+
+class DeleteLineItemMutation(graphene.Mutation):
+    class Arguments:
+        id = graphene.ID(required=True)
+
+    invoice = graphene.Field(Invoice)
+
+    @classmethod
+    def mutate(cls, root, info, id):
+        li = LineItemModel.objects.get(pk=id)
+        invoice_id = li.invoice.id
+        invoice = InvoiceModel.objects.get(pk=invoice_id)
+        li.delete()
+        invoice.update_balances()
+        return DeleteLineItemMutation(invoice=invoice)
+
+
+class ApplyCreditMutation(graphene.Mutation):
+    class Arguments:
+        invoice_id = graphene.ID(required=True)
+        amount = graphene.Float(required=True)
+        memo = graphene.String()
+        line_item_id = graphene.String()
+
+    credit = graphene.Field(Credit)
+
+    @classmethod
+    def mutate(cls, root, info, invoice_id, amount, memo="", line_item_id=None):
+        invoice = InvoiceModel.objects.get(pk=invoice_id)
+        credit = invoice.credits.create(
+            amount=amount, memo=memo, line_item_id=line_item_id
+        )
+        invoice.update_balances()
+        return ApplyCreditMutation(credit=credit)
+
+
+class DeleteCreditMutation(graphene.Mutation):
+    class Arguments:
+        credit_id = graphene.ID(required=True)
+
+    invoice = graphene.Field(Invoice)
+
+    @classmethod
+    def mutate(cls, root, info, credit_id):
+        credit = CreditModel.objects.get(pk=credit_id)
+        invoice_id = credit.invoice.id
+        credit.delete()
+        invoice = InvoiceModel.objects.get(pk=invoice_id)
+        invoice.update_balances()
+        return DeleteCreditMutation(invoice=invoice)
+
+
+class GenerateInvoicePreviewMutation(graphene.Mutation):
+    class Arguments:
+        id = graphene.ID()
+
+    url = graphene.String()
+
+    @classmethod
+    def mutate(cls, root, info, id):
+        # do some rendering junk, upload it, and return a link
+        invoice = InvoiceModel.objects.get(pk=id)
+        return GenerateInvoicePreviewMutation(url=f"/INVOICE-{invoice.id}.pdf")
 
 
 class Mutations(graphene.ObjectType):
@@ -343,6 +452,18 @@ class Mutations(graphene.ObjectType):
     modify_item = ModifyItemMutation.Field()
     modify_staff = ModifyStaffMutation.Field()
     modify_transportation = ModifyTransportationMutation.Field()
+
+    begin_invoice = BeginInvoiceMutation.Field()
+    set_invoice_state = SetInvoiceStateMutation.Field()
+    set_invoice_metadata = SetInvoiceMetadataMutation.Field()
+    get_invoice_pdf_preview = GenerateInvoicePreviewMutation.Field()
+
+    add_line_item = AddLineItemMutation.Field()
+    delete_line_item = DeleteLineItemMutation.Field()
+
+    apply_credit = ApplyCreditMutation.Field()
+    delete_credit = DeleteCreditMutation.Field()
+
 
 
 class Query(graphene.ObjectType):
