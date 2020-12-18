@@ -179,9 +179,7 @@ class VesselMutation(graphene.Mutation):
     vessel = graphene.Field(lambda: Vessel)
 
     @classmethod
-    def mutate(
-        cls, root, info, name, client_id, mmsi="", metadata=None, id=None
-    ):
+    def mutate(cls, root, info, name, client_id, mmsi="", metadata=None, id=None):
         try:
             VesselModel.objects.filter(pk=id, client_id=client_id).update(
                 name=name, mmsi=mmsi, metadata=metadata
@@ -195,9 +193,139 @@ class VesselMutation(graphene.Mutation):
         return VesselMutation(vessel=vessel)
 
 
+class JobMutation(graphene.Mutation):
+    class Arguments:
+        vessel_id = graphene.String()
+        origin_request_id = graphene.String()
+        metadata = generic.GenericScalar()
+        id = graphene.ID()
+
+    job = graphene.Field(lambda: Job)
+
+    @classmethod
+    def mutate(
+        cls, root, info, vessel_id, origin_request_id=None, metadata=None, id=None
+    ):
+        metadata = metadata or {}
+        try:
+            JobModel.objects.filter(pk=id).update(
+                vessel_id=vessel_id, origin_request=origin_request, metadata={}
+            )
+            job = JobModel.objects.get(pk=id)
+        except JobModel.DoesNotExist:
+            job = JobModel.objects.create(
+                vessel_id=vessel_id,
+                origin_request_id=origin_request_id,
+                metadata=metadata,
+            )
+        return JobMutation(job=job)
+
+
+class SKUArguments:
+    id = graphene.ID()
+    metadata = generic.GenericScalar()
+    name = graphene.String()
+    default_price = graphene.Float()
+    default_quantity = graphene.Float()
+    minimum_price = graphene.Float()
+    minimum_quantity = graphene.Float()
+    maximum_price = graphene.Float()
+    maximum_quantity = graphene.Float()
+    units = graphene.String()
+
+
+default_sku_kwargs = {
+    "name": "",
+    "default_price": 1.0,
+    "default_quantity": 1.0,
+    "minimum_price": None,
+    "minimum_quantity": None,
+    "maximum_price": None,
+    "maximum_quantity": None,
+    "units": "units",
+}
+
+
+class SKUMutation(graphene.Mutation):
+    class Arguments(SKUArguments):
+        pass
+
+    sku = graphene.Field(SKU)
+
+    @classmethod
+    def mutate(cls, root, info, id=None, metadata=None, **sku_kwargs):
+        sku_kwargs["metadata"] = SKUMetadataSchema().load(metadata or {})
+        sku_kwargs.update(default_sku_kwargs)
+        try:
+            SKUModel.objects.filter(pk=id).update(**sku_kwargs)
+            sku = SKUModel.objects.get(pk=id)
+        except SKUModel.DoesNotExist:
+            SKUModel.objects.create(**sku_kwargs)
+        return SKUMutation(sku=sku)
+
+
+class ItemMutation(graphene.Mutation):
+    class Arguments(SKUArguments):
+        pass
+
+    item = graphene.Field(SKU)
+
+    @classmethod
+    def mutate(cls, root, info, id=None, metadata=None, **sku_kwargs):
+        sku_kwargs["metadata"] = ItemMetadataSchema().load(metadata or {})
+        sku_kwargs.update(default_sku_kwargs)
+        try:
+            SKUModel.items.filter(pk=id).update(**sku_kwargs)
+            sku = SKUModel.items.get(pk=id)
+        except SKUModel.DoesNotExist:
+            SKUModel.items.create(**sku_kwargs)
+        return ItemMutation(item=sku)
+
+
+class StaffMutation(graphene.Mutation):
+    class Arguments(SKUArguments):
+        pass
+
+    staff = graphene.Field(SKU)
+
+    @classmethod
+    def mutate(cls, root, info, id=None, metadata=None, **sku_kwargs):
+        sku_kwargs["metadata"] = StaffMetadataSchema().load(metadata or {})
+        sku_kwargs.update(default_sku_kwargs)
+        try:
+            SKUModel.staff.filter(pk=id).update(**sku_kwargs)
+            sku = SKUModel.staff.get(pk=id)
+        except SKUModel.DoesNotExist:
+            SKUModel.staff.create(**sku_kwargs)
+        return StaffMutation(staff=sku)
+
+
+class TransportationMutation(graphene.Mutation):
+    class Arguments(SKUArguments):
+        pass
+
+    transportation = graphene.Field(SKU)
+
+    @classmethod
+    def mutate(cls, root, info, id=None, metadata=None, **sku_kwargs):
+        sku_kwargs["metadata"] = TransportMetadataSchema().load(metadata or {})
+        sku_kwargs.update(default_sku_kwargs)
+        try:
+            SKUModel.transportation.filter(pk=id).update(**sku_kwargs)
+            sku = SKUModel.transportation.get(pk=id)
+        except SKUModel.DoesNotExist:
+            SKUModel.transportation.create(**sku_kwargs)
+        return TransportationMutation(transportation=sku)
+
+
 class Mutations(graphene.ObjectType):
     modify_client = ClientMutation.Field()
     modify_vessel = VesselMutation.Field()
+    modify_job = JobMutation.Field()
+    modify_sku = SKUMutation.Field()
+    modify_item = ItemMutation.Field()
+    modify_staff = StaffMutation.Field()
+    modify_transportation = TransportationMutation.Field()
 
 
 class Query(graphene.ObjectType):

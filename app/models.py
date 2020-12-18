@@ -131,7 +131,7 @@ class SKU(models.Model):
     default_price = models.DecimalField(
         default=Decimal(1.0), max_digits=32, decimal_places=2
     )
-    minium_quantity = models.DecimalField(null=True, max_digits=32, decimal_places=2)
+    minimum_quantity = models.DecimalField(null=True, max_digits=32, decimal_places=2)
     minimum_price = models.DecimalField(null=True, max_digits=32, decimal_places=2)
     maximum_quantity = models.DecimalField(null=True, max_digits=32, decimal_places=2)
     maximum_price = models.DecimalField(null=True, max_digits=32, decimal_places=2)
@@ -248,11 +248,3 @@ class Credit(models.Model):
 
     def __str__(self):
         return f"INV_ID:{self.invoice.id}|{self.created_at}|AMOUNT:{self.subtotal}|POSTED:{self.posted_date}|{self.id}"
-
-
-from django.contrib import admin
-
-
-@admin.register(Client, Vessel, Request, Job, SKU, LineItem, Invoice, Credit)
-class CrusherAdmin(admin.ModelAdmin):
-    pass

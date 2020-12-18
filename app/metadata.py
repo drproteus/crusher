@@ -45,8 +45,9 @@ class ItemMetadataSchema(SKUMetadataSchema):
 
 class TransportPointSchema(Schema):
     address = fields.Str()
-    longitude = fields.Decimal()
-    latitude = fields.Decimal()
+    longitude = fields.Float()
+    latitude = fields.Float()
+    timestamp = fields.DateTime()
 
 
 class TransportMetadataSchema(SKUMetadataSchema):
@@ -68,8 +69,9 @@ class TransportMetadataSchema(SKUMetadataSchema):
 class VoyagePointSchema(Schema):
     intent = fields.Str()
     status = fields.Str()
-    longitude = fields.Decimal()
-    latitude = fields.Decimal()
+    longitude = fields.Float()
+    latitude = fields.Float()
+    timestamp = fields.DateTime()
 
 
 class JobMetadataSchema(Schema):
