@@ -122,12 +122,13 @@ class Invoice(DjangoObjectType):
 
 class ModifyClientMutation(graphene.Mutation):
     class Arguments:
-        company = graphene.String(required=True)
+        company = graphene.String()
         email = graphene.String()
         mobile = graphene.String()
         mailing_address = graphene.String()
         billing_address = graphene.String()
         metadata = generic.GenericScalar()
+        update_fields = graphene.List(graphene.String)
         id = graphene.ID()
 
     client = graphene.Field(lambda: Client)
@@ -137,59 +138,66 @@ class ModifyClientMutation(graphene.Mutation):
         cls,
         root,
         info,
-        company,
+        company="",
         email="",
         mobile="",
         mailing_address="",
         billing_address="",
         metadata=None,
+        update_fields=None,
         id=None,
     ):
         try:
-            ClientModel.objects.filter(pk=id).update(
-                company=company,
-                email=email,
-                mobile=mobile,
-                mailing_address=mailing_address,
-                billing_address=billing_address,
-                metadata=metadata,
-            )
             client = ClientModel.objects.get(pk=id)
         except ClientModel.DoesNotExist:
-            client = ClientModel.objects.create(
-                company=company,
-                email=email,
-                mobile=mobile,
-                mailing_address=mailing_address,
-                billing_address=billing_address,
-                metadata=metadata,
-            )
-        metadata = metadata or {}
+            client = ClientModel()
+            if not company:
+                raise Exception("Company Name required for new Client record")
+        client.metadata = metadata or {}
+        client.company = company
+        client.email = email
+        client.mobile = mobile
+        client.mailing_address = mailing_address
+        client.billing_address = billing_address
+        client.save(update_fields=update_fields)
+        client = ClientModel.objects.get(pk=client.id)
         return ModifyClientMutation(client=client)
 
 
 class ModifyVesselMutation(graphene.Mutation):
     class Arguments:
-        name = graphene.String(required=True)
-        client_id = graphene.String(required=True)
+        name = graphene.String()
+        client_id = graphene.String()
         mmsi = graphene.String()
         metadata = generic.GenericScalar()
+        update_fields = graphene.List(graphene.String)
         id = graphene.ID()
 
     vessel = graphene.Field(lambda: Vessel)
 
     @classmethod
-    def mutate(cls, root, info, name, client_id, mmsi="", metadata=None, id=None):
+    def mutate(
+        cls,
+        root,
+        info,
+        name,
+        client_id=None,
+        mmsi="",
+        metadata=None,
+        update_fields=None,
+        id=None,
+    ):
         try:
-            VesselModel.objects.filter(pk=id, client_id=client_id).update(
-                name=name, mmsi=mmsi, metadata=metadata
-            )
-            vessel = VesselModel.objects.get(pk=id, client_id=client_id)
+            vessel = VesselModel.objects.get(pk=id)
         except VesselModel.DoesNotExist:
-            vessel = VesselModel.objects.create(
-                name=name, client_id=client_id, mmsi=mmsi, metadata=metadata
-            )
-        metadata = metadata or {}
+            vessel = VesselModel()
+            if not client_id:
+                raise Exception("Vessel must belong to a Client record")
+        vessel.metadata = metadata or {}
+        vessel.client_id = client_id
+        vessel.mmsi = mmsi
+        vessel.save(update_fields=update_fields)
+        vessel = VesselModel.objects.get(pk=vessel.id)
         return ModifyVesselMutation(vessel=vessel)
 
 
@@ -234,18 +242,6 @@ class SKUArguments:
     units = graphene.String()
 
 
-default_sku_kwargs = {
-    "name": "",
-    "default_price": 1.0,
-    "default_quantity": 1.0,
-    "minimum_price": None,
-    "minimum_quantity": None,
-    "maximum_price": None,
-    "maximum_quantity": None,
-    "units": "units",
-}
-
-
 class ModifySKUMutation(graphene.Mutation):
     class Arguments(SKUArguments):
         pass
@@ -255,7 +251,6 @@ class ModifySKUMutation(graphene.Mutation):
     @classmethod
     def mutate(cls, root, info, id=None, metadata=None, **sku_kwargs):
         sku_kwargs["metadata"] = SKUMetadataSchema().load(metadata or {})
-        sku_kwargs.update(default_sku_kwargs)
         try:
             SKUModel.objects.filter(pk=id).update(**sku_kwargs)
             sku = SKUModel.objects.get(pk=id)
@@ -273,7 +268,6 @@ class ModifyItemMutation(graphene.Mutation):
     @classmethod
     def mutate(cls, root, info, id=None, metadata=None, **sku_kwargs):
         sku_kwargs["metadata"] = ItemMetadataSchema().load(metadata or {})
-        sku_kwargs.update(default_sku_kwargs)
         try:
             SKUModel.items.filter(pk=id).update(**sku_kwargs)
             sku = SKUModel.items.get(pk=id)
@@ -291,7 +285,6 @@ class ModifyStaffMutation(graphene.Mutation):
     @classmethod
     def mutate(cls, root, info, id=None, metadata=None, **sku_kwargs):
         sku_kwargs["metadata"] = StaffMetadataSchema().load(metadata or {})
-        sku_kwargs.update(default_sku_kwargs)
         try:
             SKUModel.staff.filter(pk=id).update(**sku_kwargs)
             sku = SKUModel.staff.get(pk=id)
@@ -309,7 +302,6 @@ class ModifyTransportationMutation(graphene.Mutation):
     @classmethod
     def mutate(cls, root, info, id=None, metadata=None, **sku_kwargs):
         sku_kwargs["metadata"] = TransportMetadataSchema().load(metadata or {})
-        sku_kwargs.update(default_sku_kwargs)
         try:
             SKUModel.transportation.filter(pk=id).update(**sku_kwargs)
             sku = SKUModel.transportation.get(pk=id)
@@ -322,7 +314,7 @@ class ModifyInvoiceMutation(graphene.Mutation):
     class Arguments:
         id = graphene.ID()
         job_id = graphene.String()
-        due_date = graphene.DateTimeField()
+        due_date = graphene.DateTime()
         metadata = generic.GenericScalar()
 
     invoice = graphene.Field(Invoice)
