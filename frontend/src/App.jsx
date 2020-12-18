@@ -42,7 +42,7 @@ const client = new ApolloClient({
 const App = () => (
   <ApolloProvider client={client}>
     <div>
-      <h2>My first Apollo app 🚀</h2>
+      <h2>CRUSHER 🚀</h2>
     </div>
 
     <GetClients />
