@@ -271,6 +271,7 @@ class ModifyVesselMutation(graphene.Mutation):
         for k, v in data.items():
             if v is not None:
                 setattr(vessel, k, v)
+        vessel.save()
         return ModifyVesselMutation(vessel=vessel)
 
 
