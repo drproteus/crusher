@@ -4,21 +4,40 @@ from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
 from app.metadata import (
-    StaffMetadataSchema,
     ItemMetadataSchema,
     TransportMetadataSchema,
+    ServiceMetadataSchema,
 )
 import uuid
+
+
+class Contact(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    first_name = models.CharField(max_length=256, blank=True)
+    last_name = models.CharField(max_length=256)
+    title = models.CharField(max_length=32, blank=True)
+    role = models.CharField(max_length=256, blank=True)
+    primary_email = models.CharField(max_length=256, blank=True)
+    phone_number = models.CharField(max_length=256, blank=True)
+    mailing_address = models.TextField(blank=True)
+    billing_address = models.TextField(blank=True)
+    metadata = models.JSONField(null=True)
+    connections = models.ManyToManyField("self")
+
+    @property
+    def name(self):
+        return " ".join([_ for _ in [self.first_name, self.last_name] if _])
+
+    @property
+    def fullname(self):
+        return " ".join([_ for _ in [self.title, self.first_name, self.last_name] if _])
 
 
 class Client(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     company = models.CharField(max_length=256)
-    email = models.EmailField(max_length=256, blank=True, default="")
-    mobile = models.CharField(max_length=256, blank=True, default="")
-    mailing_address = models.TextField(blank=True, default="")
-    billing_address = models.TextField(blank=True, default="")
     metadata = models.JSONField(null=True)
+    contact = models.ForeignKey(Contact, on_delete=models.SET_NULL, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -60,6 +79,7 @@ class Request(models.Model):
     client = models.ForeignKey(
         Client, on_delete=models.CASCADE, null=False, related_name="requests"
     )
+    contact_mentions = models.ManyToManyField(Contact, related_name="request_mentions")
     metadata = models.JSONField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -97,13 +117,13 @@ class SKUManager(models.Manager):
         return SKUQuerySet(self.model, using=self._db)
 
 
-class StaffManager(SKUManager):
+class ServiceManager(SKUManager):
     def get_queryset(self):
-        return super().get_queryset().filter(metadata__type="staff")
+        return super().get_queryset().filter(metadata__type="service")
 
-    def create(self, staff_data=None, **sku_kwargs):
+    def create(self, service_data=None, **sku_kwargs):
         sku_kwargs["units"] = sku_kwargs.get("units", "hour")
-        sku_kwargs["metadata"] = StaffMetadataSchema().load(staff_data or {})
+        sku_kwargs["metadata"] = ServiceMetadataSchema().load(service_data or {})
         return super().create(**sku_kwargs)
 
 
@@ -144,7 +164,7 @@ class SKU(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    staff = StaffManager()
+    services = ServiceManager()
     items = ItemManager()
     transportation = TransportationManager()
     objects = SKUManager()

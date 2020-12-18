@@ -5,24 +5,13 @@ class SKUMetadataSchema(Schema):
     type = fields.Str(missing="misc")
 
 
-class StaffMetadataSchema(SKUMetadataSchema):
-    first_name = fields.Str()
-    last_name = fields.Str()
-    billing_address = fields.Str()
-    mailing_address = fields.Str()
-    phone_number = fields.Str()
-    email = fields.Str()
-    affiliate_client_ids = fields.List(fields.UUID)
+class ServiceMetadataSchema(SKUMetadataSchema):
+    provider_id = fields.UUID()
 
     @post_load
     def set_type(self, item, many, **kwargs):
-        item["type"] = "staff"
+        item["type"] = "service"
         return item
-
-    # @validates("type")
-    # def check_staff_type(self, data, **kwargs):
-    #     if data != "staff":
-    #         raise ValidationError("Staff metadata type required")
 
 
 class ItemMetadataSchema(SKUMetadataSchema):
@@ -36,11 +25,6 @@ class ItemMetadataSchema(SKUMetadataSchema):
     def set_type(self, item, many, **kwargs):
         item["type"] = "item"
         return item
-
-    # @validates("type")
-    # def check_staff_type(self, data, **kwargs):
-    #     if data != "item":
-    #         raise ValidationError("Item metadata type required")
 
 
 class TransportPointSchema(Schema):
@@ -59,11 +43,6 @@ class TransportMetadataSchema(SKUMetadataSchema):
     def set_type(self, item, many, **kwargs):
         item["type"] = "transport"
         return item
-
-    # @validates("type")
-    # def check_staff_type(self, data, **kwargs):
-    #     if data != "transport":
-    #         raise ValidationError("Transport metadata type required")
 
 
 class VoyagePointSchema(Schema):

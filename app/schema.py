@@ -4,7 +4,7 @@ from graphene.types import generic
 
 from app.metadata import (
     SKUMetadataSchema,
-    StaffMetadataSchema,
+    ServiceMetadataSchema,
     TransportMetadataSchema,
     TransportPointSchema,
     VoyagePointSchema,
@@ -13,6 +13,7 @@ from app.metadata import (
 
 
 from app.models import (
+    Contact as ContactModel,
     Invoice as InvoiceModel,
     LineItem as LineItemModel,
     Credit as CreditModel,
@@ -22,6 +23,13 @@ from app.models import (
     Request as RequestModel,
     Job as JobModel,
 )
+
+
+class Contact(DjangoObjectType):
+    class Meta:
+        model = ContactModel
+
+    metadata = generic.GenericScalar()
 
 
 class Client(DjangoObjectType):
@@ -120,13 +128,81 @@ class Invoice(DjangoObjectType):
         return self.line_items.filter(sku__metadata__type="item")
 
 
+class ModifyContactMutation(graphene.Mutation):
+    class Arguments:
+        first_name = graphene.String()
+        last_name = graphene.String()
+        title = graphene.String()
+        role = graphene.String()
+        primary_email = graphene.String()
+        phone_number = graphene.String()
+        mailing_address = graphene.String()
+        billing_address = graphene.String()
+        metadata = generic.GenericScalar()
+        update_fields = graphene.List(graphene.String)
+        id = graphene.ID()
+
+    contact = graphene.Field(lambda: Contact)
+
+    @classmethod
+    def mutate(
+        cls,
+        root,
+        info,
+        first_name=None,
+        last_name=None,
+        title=None,
+        role=None,
+        primary_email=None,
+        phone_number=None,
+        mailing_address=None,
+        billing_address=None,
+        metadata=None,
+        update_fields=None,
+        id=None,
+    ):
+        try:
+            contact = ContactModel.objects.get(pk=id)
+        except ContactModel.DoesNotExist:
+            contact = ContactModel()
+        contact.first_name = first_name
+        contact.last_name = last_name
+        contact.title = title
+        contact.role = role
+        contact.primary_email = primary_email
+        contact.phone_number = phone_number
+        contact.mailing_address = mailing_address
+        contact.billing_address = billing_address
+        contact.metadata = metadata or {}
+        contact.save(update_fields=update_fields)
+        return ModifyContactMutation(contact=contact)
+
+
+class ModifyClientConnectionMutation(graphene.Mutation):
+    class Arguments:
+        c1_id = graphene.ID(required=True)
+        c2_id = graphene.ID(required=True)
+        action = graphene.String()
+
+    ok = graphene.Boolean()
+
+    @classmethod
+    def mutate(cls, root, info, c1_id, c2_id, action="link"):
+        c1 = ContactModel.objects.get(pk=c1_id)
+        c2 = ContactModel.objects.get(pk=c2_id)
+        if action == "link":
+            c1.connections.add(c2)
+            return ModifyClientConnectionMutation(ok=True)
+        elif action == "unlink":
+            c1.connections.remove(c2)
+            return ModifyClientConnectionMutation(ok=True)
+        return ModifyClientConnectionMutation(ok=False)
+
+
 class ModifyClientMutation(graphene.Mutation):
     class Arguments:
         company = graphene.String()
-        email = graphene.String()
-        mobile = graphene.String()
-        mailing_address = graphene.String()
-        billing_address = graphene.String()
+        contact_id = graphene.ID()
         metadata = generic.GenericScalar()
         update_fields = graphene.List(graphene.String)
         id = graphene.ID()
@@ -138,11 +214,8 @@ class ModifyClientMutation(graphene.Mutation):
         cls,
         root,
         info,
-        company="",
-        email="",
-        mobile="",
-        mailing_address="",
-        billing_address="",
+        company=None,
+        contact_id=None,
         metadata=None,
         update_fields=None,
         id=None,
@@ -150,15 +223,10 @@ class ModifyClientMutation(graphene.Mutation):
         try:
             client = ClientModel.objects.get(pk=id)
         except ClientModel.DoesNotExist:
-            client = ClientModel()
+            client = ClientModel(contact_id=contact_id)
             if not company:
                 raise Exception("Company Name required for new Client record")
         client.metadata = metadata or {}
-        client.company = company
-        client.email = email
-        client.mobile = mobile
-        client.mailing_address = mailing_address
-        client.billing_address = billing_address
         client.save(update_fields=update_fields)
         client = ClientModel.objects.get(pk=client.id)
         return ModifyClientMutation(client=client)
@@ -463,7 +531,6 @@ class Mutations(graphene.ObjectType):
 
     apply_credit = ApplyCreditMutation.Field()
     delete_credit = DeleteCreditMutation.Field()
-
 
 
 class Query(graphene.ObjectType):
