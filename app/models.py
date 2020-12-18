@@ -13,7 +13,7 @@ import uuid
 
 class Contact(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    first_name = models.CharField(max_length=256, blank=True)
+    first_name = models.CharField(max_length=256, blank=True, null=True)
     last_name = models.CharField(max_length=256)
     title = models.CharField(max_length=32, blank=True, null=True)
     role = models.CharField(max_length=256, blank=True, null=True)
@@ -184,6 +184,11 @@ class SKU(models.Model):
     def __str__(self):
         return f"{self.name}|{self.created_at}|{self.sku_type}|{self.id}"
 
+    def save(self, *args, **kwargs):
+        if self.metadata is None:
+            self.metadata = {}
+        super().save(*args, **kwargs)
+
 
 class ServiceSKU(SKU):
     class Meta:
@@ -198,7 +203,6 @@ class ServiceSKU(SKU):
         super().save(*args, **kwargs)
 
 
-
 class ItemSKU(SKU):
     class Meta:
         proxy = True
@@ -206,9 +210,7 @@ class ItemSKU(SKU):
     objects = ItemManager()
 
     def save(self, *args, **kwargs):
-        self.metadata = ItemMetadataSchema().load(
-            self.metadata or {"type": "item"}
-        )
+        self.metadata = ItemMetadataSchema().load(self.metadata or {"type": "item"})
         super().save(*args, **kwargs)
 
 

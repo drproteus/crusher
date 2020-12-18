@@ -149,53 +149,37 @@ class Invoice(DjangoObjectType):
         return self.line_items.filter(sku__metadata__type="item")
 
 
+class ContactInput(graphene.InputObjectType):
+    first_name = graphene.String()
+    last_name = graphene.String()
+    title = graphene.String()
+    role = graphene.String()
+    primary_email = graphene.String()
+    phone_number = graphene.String()
+    mailing_address = graphene.String()
+    billing_address = graphene.String()
+    metadata = generic.GenericScalar()
+
+
 class ModifyContactMutation(graphene.Mutation):
     class Arguments:
-        first_name = graphene.String()
-        last_name = graphene.String()
-        title = graphene.String()
-        role = graphene.String()
-        primary_email = graphene.String()
-        phone_number = graphene.String()
-        mailing_address = graphene.String()
-        billing_address = graphene.String()
-        metadata = generic.GenericScalar()
-        update_fields = graphene.List(graphene.String)
+        data = ContactInput(required=True)
         id = graphene.ID()
 
     contact = graphene.Field(lambda: Contact)
 
     @classmethod
     def mutate(
-        cls,
-        root,
-        info,
-        first_name=None,
-        last_name=None,
-        title=None,
-        role=None,
-        primary_email=None,
-        phone_number=None,
-        mailing_address=None,
-        billing_address=None,
-        metadata=None,
-        update_fields=None,
-        id=None,
+        cls, root, info, data, id=None,
     ):
         try:
             contact = ContactModel.objects.get(pk=id)
         except ContactModel.DoesNotExist:
             contact = ContactModel()
-        contact.first_name = first_name
-        contact.last_name = last_name
-        contact.title = title
-        contact.role = role
-        contact.primary_email = primary_email
-        contact.phone_number = phone_number
-        contact.mailing_address = mailing_address
-        contact.billing_address = billing_address
-        contact.metadata = metadata or {}
-        contact.save(update_fields=update_fields)
+        for k, v in data.items():
+            if v is not None:
+                setattr(contact, k, v)
+        contact.save()
         return ModifyContactMutation(contact=contact)
 
 
@@ -220,101 +204,98 @@ class ModifyClientConnectionMutation(graphene.Mutation):
         return ModifyClientConnectionMutation(ok=False)
 
 
+class ClientInput(graphene.InputObjectType):
+    company = graphene.String()
+    contact_id = graphene.ID()
+    metadata = generic.GenericScalar()
+
+
+class DeleteClientContact(graphene.Mutation):
+    class Arguments:
+        id = graphene.ID(required=True)
+
+    client = graphene.Field(lambda: Client)
+
+    @classmethod
+    def mutate(cls, root, info, id):
+        client = ClientModel.objects.get(pk=id)
+        client.contact_id = None
+        client.save()
+        return DeleteClientContact(client=client)
+
+
 class ModifyClientMutation(graphene.Mutation):
     class Arguments:
-        company = graphene.String()
-        contact_id = graphene.ID()
-        metadata = generic.GenericScalar()
-        update_fields = graphene.List(graphene.String)
+        data = ClientInput(required=True)
         id = graphene.ID()
 
     client = graphene.Field(lambda: Client)
 
     @classmethod
     def mutate(
-        cls,
-        root,
-        info,
-        company=None,
-        contact_id=None,
-        metadata=None,
-        update_fields=None,
-        id=None,
+        cls, root, info, data, id=None,
     ):
         try:
             client = ClientModel.objects.get(pk=id)
         except ClientModel.DoesNotExist:
-            client = ClientModel(contact_id=contact_id)
-            if not company:
-                raise Exception("Company Name required for new Client record")
-        client.metadata = metadata or {}
-        client.save(update_fields=update_fields)
-        client = ClientModel.objects.get(pk=client.id)
+            client = ClientModel()
+        for k, v in data.items():
+            if v is not None:
+                setattr(client, k, v)
+        client.save()
         return ModifyClientMutation(client=client)
+
+
+class VesselInput(graphene.InputObjectType):
+    name = graphene.String()
+    client_id = graphene.String()
+    mmsi = graphene.String()
+    metadata = generic.GenericScalar()
 
 
 class ModifyVesselMutation(graphene.Mutation):
     class Arguments:
-        name = graphene.String()
-        client_id = graphene.String()
-        mmsi = graphene.String()
-        metadata = generic.GenericScalar()
-        update_fields = graphene.List(graphene.String)
+        data = VesselInput(required=True)
         id = graphene.ID()
 
     vessel = graphene.Field(lambda: Vessel)
 
     @classmethod
     def mutate(
-        cls,
-        root,
-        info,
-        name,
-        client_id=None,
-        mmsi="",
-        metadata=None,
-        update_fields=None,
-        id=None,
+        cls, root, info, data, id=None,
     ):
         try:
             vessel = VesselModel.objects.get(pk=id)
         except VesselModel.DoesNotExist:
             vessel = VesselModel()
-            if not client_id:
-                raise Exception("Vessel must belong to a Client record")
-        vessel.metadata = metadata or {}
-        vessel.client_id = client_id
-        vessel.mmsi = mmsi
-        vessel.save(update_fields=update_fields)
-        vessel = VesselModel.objects.get(pk=vessel.id)
+        for k, v in data.items():
+            if v is not None:
+                setattr(vessel, k, v)
         return ModifyVesselMutation(vessel=vessel)
+
+
+class JobInput(graphene.InputObjectType):
+    vessel_id = graphene.String()
+    origin_request_id = graphene.String()
+    metadata = generic.GenericScalar()
 
 
 class ModifyJobMutation(graphene.Mutation):
     class Arguments:
-        vessel_id = graphene.String()
-        origin_request_id = graphene.String()
-        metadata = generic.GenericScalar()
+        data = JobInput(required=True)
         id = graphene.ID()
 
     job = graphene.Field(lambda: Job)
 
     @classmethod
-    def mutate(
-        cls, root, info, vessel_id, origin_request_id=None, metadata=None, id=None
-    ):
-        metadata = metadata or {}
+    def mutate(cls, root, info, data, id=None):
         try:
-            JobModel.objects.filter(pk=id).update(
-                vessel_id=vessel_id, origin_request_id=origin_request_id, metadata={}
-            )
             job = JobModel.objects.get(pk=id)
         except JobModel.DoesNotExist:
-            job = JobModel.objects.create(
-                vessel_id=vessel_id,
-                origin_request_id=origin_request_id,
-                metadata=metadata,
-            )
+            job = JobModel()
+        for k, v in data.items():
+            if v is not None:
+                setattr(job, k, v)
         return ModifyJobMutation(job=job)
 
 
@@ -361,8 +342,7 @@ class ModifySKUContactRelationMutation(graphene.Mutation):
         return ModifySKUContactRelationMutation(ok=False)
 
 
-class SKUArguments:
-    id = graphene.ID()
+class SKUInput(graphene.InputObjectType):
     metadata = generic.GenericScalar()
     name = graphene.String()
     default_price = graphene.Float()
@@ -375,67 +355,21 @@ class SKUArguments:
 
 
 class ModifySKUMutation(graphene.Mutation):
-    class Arguments(SKUArguments):
-        pass
+    class Arguments:
+        data = SKUInput(required=True)
+        id = graphene.ID()
 
     sku = graphene.Field(SKU)
 
     @classmethod
-    def mutate(cls, root, info, id=None, **sku_kwargs):
+    def mutate(cls, root, info, data, id=None):
+        sku_kwargs = {k: v for k, v in data.items() if v is not None}
         try:
             SKUModel.objects.filter(pk=id).update(**sku_kwargs)
             sku = SKUModel.objects.get(pk=id)
         except SKUModel.DoesNotExist:
             sku = SKUModel.objects.create(**sku_kwargs)
         return ModifySKUMutation(sku=sku)
-
-
-class ModifyItemMutation(graphene.Mutation):
-    class Arguments(SKUArguments):
-        pass
-
-    item = graphene.Field(SKU)
-
-    @classmethod
-    def mutate(cls, root, info, id=None, **sku_kwargs):
-        try:
-            ItemSKUModel.objects.filter(pk=id).update(**sku_kwargs)
-            sku = ItemSKUModel.items.get(pk=id)
-        except ItemSKUModel.DoesNotExist:
-            sku = ItemSKUModel.objects.create(**sku_kwargs)
-        return ModifyItemMutation(item=sku)
-
-
-class ModifyServiceMutation(graphene.Mutation):
-    class Arguments(SKUArguments):
-        pass
-
-    service = graphene.Field(SKU)
-
-    @classmethod
-    def mutate(cls, root, info, id=None, **sku_kwargs):
-        try:
-            ServiceSKUModel.objects.filter(pk=id).update(**sku_kwargs)
-            sku = ServiceSKUModel.objects.get(pk=id)
-        except ServiceSKUModel.DoesNotExist:
-            sku = ServiceSKUModel.objects.create(**sku_kwargs)
-        return ModifyServiceMutation(service=sku)
-
-
-class ModifyTransportationMutation(graphene.Mutation):
-    class Arguments(SKUArguments):
-        pass
-
-    transportation = graphene.Field(SKU)
-
-    @classmethod
-    def mutate(cls, root, info, id=None, **sku_kwargs):
-        try:
-            TransportationSKUModel.objects.filter(pk=id).update(**sku_kwargs)
-            sku = TransportationSKUModel.objects.get(pk=id)
-        except TransportationSKUModel.DoesNotExist:
-            sku = TransportationSKUModel.objects.create(**sku_kwargs)
-        return ModifyTransportationMutation(transportation=sku)
 
 
 class BeginInvoiceMutation(graphene.Mutation):
@@ -581,9 +515,6 @@ class Mutations(graphene.ObjectType):
     modify_vessel = ModifyVesselMutation.Field()
     modify_job = ModifyJobMutation.Field()
     modify_sku = ModifySKUMutation.Field()
-    modify_item = ModifyItemMutation.Field()
-    modify_service = ModifyServiceMutation.Field()
-    modify_transportation = ModifyTransportationMutation.Field()
 
     begin_invoice = BeginInvoiceMutation.Field()
     set_invoice_state = SetInvoiceStateMutation.Field()
