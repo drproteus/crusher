@@ -120,3 +120,4 @@ media
 
 .vscode/
 frontend/node_modules/
+static/
