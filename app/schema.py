@@ -120,7 +120,7 @@ class Invoice(DjangoObjectType):
         return self.line_items.filter(sku__metadata__type="item")
 
 
-class ClientMutation(graphene.Mutation):
+class ModifyClientMutation(graphene.Mutation):
     class Arguments:
         company = graphene.String(required=True)
         email = graphene.String()
@@ -165,10 +165,10 @@ class ClientMutation(graphene.Mutation):
                 metadata=metadata,
             )
         metadata = metadata or {}
-        return ClientMutation(client=client)
+        return ModifyClientMutation(client=client)
 
 
-class VesselMutation(graphene.Mutation):
+class ModifyVesselMutation(graphene.Mutation):
     class Arguments:
         name = graphene.String(required=True)
         client_id = graphene.String(required=True)
@@ -190,10 +190,10 @@ class VesselMutation(graphene.Mutation):
                 name=name, client_id=client_id, mmsi=mmsi, metadata=metadata
             )
         metadata = metadata or {}
-        return VesselMutation(vessel=vessel)
+        return ModifyVesselMutation(vessel=vessel)
 
 
-class JobMutation(graphene.Mutation):
+class ModifyJobMutation(graphene.Mutation):
     class Arguments:
         vessel_id = graphene.String()
         origin_request_id = graphene.String()
@@ -209,7 +209,7 @@ class JobMutation(graphene.Mutation):
         metadata = metadata or {}
         try:
             JobModel.objects.filter(pk=id).update(
-                vessel_id=vessel_id, origin_request=origin_request, metadata={}
+                vessel_id=vessel_id, origin_request_id=origin_request_id, metadata={}
             )
             job = JobModel.objects.get(pk=id)
         except JobModel.DoesNotExist:
@@ -218,7 +218,7 @@ class JobMutation(graphene.Mutation):
                 origin_request_id=origin_request_id,
                 metadata=metadata,
             )
-        return JobMutation(job=job)
+        return ModifyJobMutation(job=job)
 
 
 class SKUArguments:
@@ -246,7 +246,7 @@ default_sku_kwargs = {
 }
 
 
-class SKUMutation(graphene.Mutation):
+class ModifySKUMutation(graphene.Mutation):
     class Arguments(SKUArguments):
         pass
 
@@ -261,10 +261,10 @@ class SKUMutation(graphene.Mutation):
             sku = SKUModel.objects.get(pk=id)
         except SKUModel.DoesNotExist:
             sku = SKUModel.objects.create(**sku_kwargs)
-        return SKUMutation(sku=sku)
+        return ModifySKUMutation(sku=sku)
 
 
-class ItemMutation(graphene.Mutation):
+class ModifyItemMutation(graphene.Mutation):
     class Arguments(SKUArguments):
         pass
 
@@ -279,10 +279,10 @@ class ItemMutation(graphene.Mutation):
             sku = SKUModel.items.get(pk=id)
         except SKUModel.DoesNotExist:
             sku = SKUModel.items.create(**sku_kwargs)
-        return ItemMutation(item=sku)
+        return ModifyItemMutation(item=sku)
 
 
-class StaffMutation(graphene.Mutation):
+class ModifyStaffMutation(graphene.Mutation):
     class Arguments(SKUArguments):
         pass
 
@@ -297,10 +297,10 @@ class StaffMutation(graphene.Mutation):
             sku = SKUModel.staff.get(pk=id)
         except SKUModel.DoesNotExist:
             sku = SKUModel.staff.create(**sku_kwargs)
-        return StaffMutation(staff=sku)
+        return ModifyStaffMutation(staff=sku)
 
 
-class TransportationMutation(graphene.Mutation):
+class ModifyTransportationMutation(graphene.Mutation):
     class Arguments(SKUArguments):
         pass
 
@@ -315,17 +315,42 @@ class TransportationMutation(graphene.Mutation):
             sku = SKUModel.transportation.get(pk=id)
         except SKUModel.DoesNotExist:
             sku = SKUModel.transportation.create(**sku_kwargs)
-        return TransportationMutation(transportation=sku)
+        return ModifyTransportationMutation(transportation=sku)
+
+
+class ModifyInvoiceMutation(graphene.Mutation):
+    class Arguments:
+        id = graphene.ID()
+        job_id = graphene.String()
+        due_date = graphene.DateTimeField()
+        metadata = generic.GenericScalar()
+
+    invoice = graphene.Field(Invoice)
+
+    @classmethod
+    def mutate(
+        cls, root, info, id=None, job_id=None, state=0, due_date=None, metadata=None
+    ):
+        metadata = metadata or {}
+        try:
+            invoice = InvoiceModel.objects.filter(pk=id).update(
+                state=state, due_date=due_date, metadata=metadata
+            )
+        except InvoiceModel.DoesNotExist:
+            invoice = InvoiceModel.objects.create(
+                state=state, due_date=due_date, metadate=metadata
+            )
+        return ModifyInvoiceMutation(invoice=invoice)
 
 
 class Mutations(graphene.ObjectType):
-    modify_client = ClientMutation.Field()
-    modify_vessel = VesselMutation.Field()
-    modify_job = JobMutation.Field()
-    modify_sku = SKUMutation.Field()
-    modify_item = ItemMutation.Field()
-    modify_staff = StaffMutation.Field()
-    modify_transportation = TransportationMutation.Field()
+    modify_client = ModifyClientMutation.Field()
+    modify_vessel = ModifyVesselMutation.Field()
+    modify_job = ModifyJobMutation.Field()
+    modify_sku = ModifySKUMutation.Field()
+    modify_item = ModifyItemMutation.Field()
+    modify_staff = ModifyStaffMutation.Field()
+    modify_transportation = ModifyTransportationMutation.Field()
 
 
 class Query(graphene.ObjectType):
