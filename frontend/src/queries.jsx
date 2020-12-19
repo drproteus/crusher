@@ -7,6 +7,7 @@ query ($id: UUID, $company: String, $companyLike: String) {
       node {
         clientId,
         company,
+        metadata,
         contact {
           id,
           name,

@@ -5,9 +5,20 @@ import Nav from 'react-bootstrap/Nav';
 import Table from 'react-bootstrap/Table';
 import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
+import Media from 'react-bootstrap/Media';
 
 import { SKUS, CONTACTS, CLIENTS } from "./queries.jsx";
 
+
+function ClientDetail({ client }) {
+    return <Media>
+        <ClientImage client={client} width={64} height={64}></ClientImage>
+        <Media.Body>
+            <p>{client.company}: <Link to={"/clients/" + client.clientId}>{client.clientId}</Link></p>
+            <Metadata inner={client.metadata}></Metadata>
+        </Media.Body>
+    </Media>;
+}
 
 function Clients() {
     const { loading, error, data } = useQuery(CLIENTS, { variables: useParams() });
@@ -17,11 +28,14 @@ function Clients() {
 
     return data.clients.edges.map(({ node }) => (
         <div key={node.clientId}>
-            <p>
-                {node.company}: {node.clientId}
-            </p>
+            <ClientDetail client={node}></ClientDetail>
         </div>
     ));
+}
+
+function ClientImage({ client, width, height}) {
+    let placeholder = client.metadata.profile_image_url || "http://placekitten.com/200/200";
+    return <img width={width} height={height} src={placeholder}></img>;
 }
 
 
@@ -59,7 +73,7 @@ function SKURows() {
 
 
 function Home() {
-    return <div class="jumbotron">crusher.beta</div>
+    return <div className="jumbotron">crusher.beta</div>
 }
 
 export { Clients, Contacts, Metadata, SKUs, Home, MainNav };
