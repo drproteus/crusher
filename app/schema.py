@@ -170,7 +170,11 @@ class ModifyContactMutation(graphene.Mutation):
 
     @classmethod
     def mutate(
-        cls, root, info, data, id=None,
+        cls,
+        root,
+        info,
+        data,
+        id=None,
     ):
         try:
             contact = ContactModel.objects.get(pk=id)
@@ -233,7 +237,11 @@ class ModifyClientMutation(graphene.Mutation):
 
     @classmethod
     def mutate(
-        cls, root, info, data, id=None,
+        cls,
+        root,
+        info,
+        data,
+        id=None,
     ):
         try:
             client = ClientModel.objects.get(pk=id)
@@ -262,7 +270,11 @@ class ModifyVesselMutation(graphene.Mutation):
 
     @classmethod
     def mutate(
-        cls, root, info, data, id=None,
+        cls,
+        root,
+        info,
+        data,
+        id=None,
     ):
         try:
             vessel = VesselModel.objects.get(pk=id)
@@ -464,17 +476,16 @@ class ApplyCreditMutation(graphene.Mutation):
         invoice_id = graphene.ID(required=True)
         amount = graphene.Float(required=True)
         memo = graphene.String()
-        line_item_id = graphene.String()
+        metadata = generic.GenericScalar()
 
     credit = graphene.Field(Credit)
 
     @classmethod
-    def mutate(cls, root, info, invoice_id, amount, memo="", line_item_id=None):
+    def mutate(cls, root, info, invoice_id, amount, memo="", metadata=None):
         invoice = InvoiceModel.objects.get(pk=invoice_id)
         credit = invoice.credits.create(
-            amount=amount, memo=memo, line_item_id=line_item_id
+            amount=amount, memo=memo, metadata=metadata or {}
         )
-        invoice.update_balances()
         return ApplyCreditMutation(credit=credit)
 
 
@@ -490,7 +501,6 @@ class DeleteCreditMutation(graphene.Mutation):
         invoice_id = credit.invoice.id
         credit.delete()
         invoice = InvoiceModel.objects.get(pk=invoice_id)
-        invoice.update_balances()
         return DeleteCreditMutation(invoice=invoice)
 
 
@@ -634,6 +644,7 @@ class ContactFilterSet(django_filters.FilterSet):
             "mailing_address": ["icontains"],
             "primary_email": ["exact", "icontains"],
         }
+
 
 class ContactNode(DjangoObjectType):
     class Meta:
