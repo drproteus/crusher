@@ -2,7 +2,7 @@ const path = require('path');
 
 const resolvePath = relPath => path.resolve(__dirname, relPath);
 
-const entryFile = resolvePath('./src/App.jsx');
+const entryFile = resolvePath('./src/app.jsx');
 const outputDir = resolvePath('../static/');
 
 const bundleName = 'js/[name].js';
