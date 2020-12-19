@@ -36,7 +36,7 @@ const CLIENTS = gql`
 `
 
 const CONTACTS = gql`{contacts{edges{node{contactId,name}}}}`;
-const SKUS = gql`{skus{edges{node{skuId,metadata,defaultPrice,defaultQuantity}}}}`;
+const SKUS = gql`{skus{edges{node{name,skuId,metadata,defaultPrice,defaultQuantity}}}}`;
 
 const link = createHttpLink({
   uri: '/graphql',
@@ -154,10 +154,9 @@ function SKUs() {
   if (error) return <p>Error :(</p>;
 
   return data.skus.edges.map(({ node }) => (
-    <div key={node.contactId}>
-      <p>
-        {node.name}
-      </p>
+    <div key={node.skuId}>
+      <p><b>${node.defaultPrice}</b> -- {node.name || "unknown"} -- <em>{node.skuId}</em></p>
+      <Metadata inner={node.metadata}></Metadata>
     </div>
   ));
 }
