@@ -7,18 +7,28 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('app', '0019_auto_20201218_1750'),
+        ("app", "0019_auto_20201218_1750"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='credit',
-            name='client',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='credits', to='app.client'),
+            model_name="credit",
+            name="client",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="credits",
+                to="app.client",
+            ),
         ),
         migrations.AlterField(
-            model_name='credit',
-            name='invoice',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='applied_credits', to='app.invoice'),
+            model_name="credit",
+            name="invoice",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="applied_credits",
+                to="app.invoice",
+            ),
         ),
     ]

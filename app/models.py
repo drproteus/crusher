@@ -297,7 +297,9 @@ class LineItem(models.Model):
 
 class Credit(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    contact = models.ForeignKey(Contact, on_delete=models.SET_NULL, null=True, related_name="+")
+    contact = models.ForeignKey(
+        Contact, on_delete=models.SET_NULL, null=True, related_name="+"
+    )
     invoice = models.ForeignKey(
         Invoice, on_delete=models.CASCADE, related_name="credits"
     )

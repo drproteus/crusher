@@ -11,6 +11,8 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.RenameField(
-            model_name="sku", old_name="minium_quantity", new_name="minimum_quantity",
+            model_name="sku",
+            old_name="minium_quantity",
+            new_name="minimum_quantity",
         ),
     ]

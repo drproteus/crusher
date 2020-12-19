@@ -13,7 +13,9 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AddField(
-            model_name="client", name="metadata", field=models.JSONField(null=True),
+            model_name="client",
+            name="metadata",
+            field=models.JSONField(null=True),
         ),
         migrations.AddField(
             model_name="lineitem",
