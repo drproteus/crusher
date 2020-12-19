@@ -47,6 +47,7 @@ query ($id: UUID, $nameLike: String, $defaultPriceExact: Float, $tag: String, $s
             node {
                 name,
                 skuId,
+                units,
                 metadata,
                 defaultPrice,
                 defaultQuantity

@@ -122,7 +122,7 @@ function SKURow({ node }) {
     return <tr>
         <td>{node.skuId}</td>
         <td>{node.name || node.metadata.name || "???"}</td>
-        <td>{node.type}</td>
+        <td>{node.metadata.type}</td>
         <td>{node.units}</td>
         <td>{node.defaultPrice}</td>
         <td>{node.defaultQuantity}</td>
