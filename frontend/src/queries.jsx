@@ -2,25 +2,25 @@ import { gql } from 'apollo-boost';
 
 const CLIENTS = gql`
 query ($id: UUID, $company: String, $companyLike: String) {
-  clients(id: $id, company: $company, company_Icontains: $companyLike) {
+  clients(uid: $id, company: $company, company_Icontains: $companyLike) {
     edges {
       node {
-        clientId,
+        uid,
         company,
         metadata,
         contact {
-          id,
+          uid,
           name,
           primaryEmail
         },
         invoices {
           edges {
             node {
-              invoiceId,
+              uid,
               paidBalance,
               initialBalance,
               lineItems {
-                id,
+                uid,
                 subtotal
               }
             }
@@ -34,10 +34,10 @@ query ($id: UUID, $company: String, $companyLike: String) {
 
 const CONTACTS = gql`
 query ($id: UUID, $firstNameLike: String, $lastNameLike: String, $emailLike: String) {
-    contacts(id: $id, firstName_Icontains: $firstNameLike, lastName_Icontains: $lastNameLike, primaryEmail_Icontains: $emailLike) {
+    contacts(uid: $id, firstName_Icontains: $firstNameLike, lastName_Icontains: $lastNameLike, primaryEmail_Icontains: $emailLike) {
         edges {
             node{
-                contactId,
+                uid,
                 primaryEmail,
                 phoneNumber,
                 name,
@@ -55,11 +55,11 @@ query ($id: UUID, $firstNameLike: String, $lastNameLike: String, $emailLike: Str
 
 const SKUS = gql`
 query ($id: UUID, $nameLike: String, $defaultPriceExact: Float, $tag: String, $skuType: String) {
-    skus(id: $id, name: $nameLike, defaultPrice: $defaultPriceExact, tag: $tag, skuType: $skuType) {
+    skus(uid: $id, name: $nameLike, defaultPrice: $defaultPriceExact, tag: $tag, skuType: $skuType) {
         edges {
             node {
                 name,
-                skuId,
+                uid,
                 units,
                 metadata,
                 defaultPrice,

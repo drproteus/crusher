@@ -44,7 +44,7 @@ function ClientDetail({ client }) {
             <ClientImage client={client} width={200} height={200}></ClientImage>
             <Media.Body style={{ marginLeft: 10 }}>
                 <h4>{client.company}</h4>
-                <p className="text-muted"><Link to={"/clients/" + client.clientId}>{client.clientId}</Link></p>
+                <p className="text-muted"><Link to={"/clients/" + client.uid}>{client.uid}</Link></p>
                 <ClientAboutBrief client={client}></ClientAboutBrief>
             </Media.Body>
         </Media>,
@@ -85,7 +85,7 @@ function ClientContactShort({ client }) {
             <p>
                 {client.contact.name}
             </p>
-            <Link to={"/contacts/" + client.contact.id}><Button>View</Button></Link>
+            <Link to={"/contacts/" + client.contact.uid}><Button>View</Button></Link>
         </Alert>
     ];
 }
@@ -110,7 +110,7 @@ function Clients() {
             <ClientBreadcrumbs></ClientBreadcrumbs>
         </Breadcrumb>,
         data.clients.edges.map(({ node }) => (
-            <div key={node.clientId}>
+            <div key={node.uid}>
                 <ClientDetail client={node}></ClientDetail>
             </div>
         ))];
@@ -129,9 +129,9 @@ function Contacts() {
     if (error) return <p>Error :(</p>;
 
     return data.contacts.edges.map(({ node }) => (
-        <div key={node.contactId}>
+        <div key={node.uid}>
             <p>
-                {node.fullname}: <Link to={`/contacts/${node.contactId}`}>{node.contactId}</Link>
+                {node.fullname}: <Link to={`/contacts/${node.uid}`}>{node.uid}</Link>
             </p>
             <JSONPretty data={node.metadata}></JSONPretty>
         </div>
@@ -259,17 +259,17 @@ function SKUs() {
 
 function SKURow({ node }) {
     return [
-        <tr key={node.skuId}>
+        <tr key={node.uid}>
             <td>{node.name || node.metadata.name || "???"}</td>
             <td><Link to={"/skus/by-type/" + node.metadata.type}>{node.metadata.type}</Link></td>
             <td>{node.units}</td>
             <td>{node.defaultPrice}</td>
             <td>{node.defaultQuantity}</td>
         </tr>,
-        <tr key={"extra-" + node.skuId}>
+        <tr key={"extra-" + node.uid}>
             <td></td>
             <td><JSONPretty data={node.metadata}></JSONPretty></td>
-            <td colSpan="2" align="right"><Link to={`/skus/${node.skuId}`}>{node.skuId}</Link></td>
+            <td colSpan="2" align="right"><Link to={`/skus/${node.uid}`}>{node.uid}</Link></td>
             <td align="center"><ButtonGroup><Button variant="danger">Delete</Button><Button variant="info">Edit</Button></ButtonGroup></td>
         </tr>
     ]

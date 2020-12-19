@@ -13,7 +13,7 @@ import uuid
 
 
 class Contact(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    uid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     first_name = models.CharField(max_length=256, blank=True, null=True)
     last_name = models.CharField(max_length=256)
     title = models.CharField(max_length=32, blank=True, null=True)
@@ -41,7 +41,7 @@ class Contact(models.Model):
 
 
 class Client(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    uid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     company = models.CharField(max_length=256)
     metadata = models.JSONField(null=True)
     contact = models.ForeignKey(Contact, on_delete=models.SET_NULL, null=True)
@@ -49,11 +49,11 @@ class Client(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"{self.company}[{self.id}]"
+        return f"{self.company}[{self.uid}]"
 
 
 class Vessel(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    uid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=256)
     mmsi = models.CharField(
         max_length=9,
@@ -69,7 +69,7 @@ class Vessel(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"{self.name}[{self.id}]"
+        return f"{self.name}[{self.uid}]"
 
 
 class Request(models.Model):
@@ -79,7 +79,7 @@ class Request(models.Model):
         REJECTED = -1
         PROCESSED = 2
 
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    uid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     state = models.IntegerField(
         choices=RequestState.choices, default=RequestState.RECEIVED
     )
@@ -93,7 +93,7 @@ class Request(models.Model):
 
 
 class Job(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    uid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     vessel = models.ForeignKey(
         Vessel, on_delete=models.SET_NULL, null=True, related_name="jobs"
     )
@@ -112,7 +112,7 @@ class SKUQuerySet(models.QuerySet):
         with transaction.atomic():
             for sku in self.all():
                 li = sku.add_to_invoice(invoice, **li_kwargs)
-                new_line_item_ids.add(li.id)
+                new_line_item_ids.add(li.uid)
         return LineItem.objects.filter(id__in=new_line_item_ids)
 
 
@@ -237,7 +237,7 @@ class Invoice(models.Model):
         CLOSED = 4
         VOID = -1
 
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    uid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     client = models.ForeignKey(
         Client, on_delete=models.SET_NULL, null=True, related_name="invoices"
     )
@@ -276,7 +276,7 @@ class Invoice(models.Model):
 
 
 class LineItem(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    uid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     invoice = models.ForeignKey(
         Invoice, on_delete=models.CASCADE, related_name="line_items"
     )
@@ -296,7 +296,7 @@ class LineItem(models.Model):
 
 
 class Credit(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    uid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     contact = models.ForeignKey(
         Contact, on_delete=models.SET_NULL, null=True, related_name="+"
     )
