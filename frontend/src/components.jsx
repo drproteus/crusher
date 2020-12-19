@@ -30,6 +30,14 @@ import JSONPretty from 'react-json-pretty';
 import { SKUS, CONTACTS, CLIENTS } from "./queries.jsx";
 
 
+function ClientAboutBrief({ client }) {
+    if (client.metadata && client.metadata.about) {
+        return <p>{client.metadata.about}</p>;
+    }
+    return null;
+};
+
+
 function ClientDetail({ client }) {
     let details = [
         <Media>
@@ -37,11 +45,9 @@ function ClientDetail({ client }) {
             <Media.Body style={{ marginLeft: 10 }}>
                 <h4>{client.company}</h4>
                 <p className="text-muted"><Link to={"/clients/" + client.clientId}>{client.clientId}</Link></p>
-                <pre>ADD MORE STUFF HERE</pre>
+                <ClientAboutBrief client={client}></ClientAboutBrief>
             </Media.Body>
         </Media>,
-        <h5>metadata</h5>,
-        <JSONPretty data={client.metadata}></JSONPretty>,
         <Row>
             <Col md={6} className="p-3">
                 <ClientInvoiceList client={client}></ClientInvoiceList>
@@ -84,17 +90,30 @@ function ClientContactShort({ client }) {
     ];
 }
 
+function ClientBreadcrumbs() {
+    let params = useParams();
+    let crumbs = ["Clients"]
+    if (params.id) {
+        crumbs.push(params.id);
+    }
+    return crumbs.map(c => <Breadcrumb.Item>{c}</Breadcrumb.Item>);
+}
+
 function Clients() {
     const { loading, error, data } = useQuery(CLIENTS, { variables: useParams() });
 
     if (loading) return <GraphQLLoading></GraphQLLoading>;
     if (error) return <p>Error :(</p>;
 
-    return data.clients.edges.map(({ node }) => (
-        <div key={node.clientId}>
-            <ClientDetail client={node}></ClientDetail>
-        </div>
-    ));
+    return [
+        <Breadcrumb>
+            <ClientBreadcrumbs></ClientBreadcrumbs>
+        </Breadcrumb>,
+        data.clients.edges.map(({ node }) => (
+            <div key={node.clientId}>
+                <ClientDetail client={node}></ClientDetail>
+            </div>
+        ))];
 }
 
 function ClientImage({ client, width, height }) {

@@ -59,19 +59,15 @@ const App = () => (
                 <SKUs />
               </Route>
               <Route path="/contacts/:id">
-                <h3>Contact Detail</h3>
                 <Contacts />
               </Route>
               <Route path="/contacts">
-                <h3>All Contacts</h3>
                 <Contacts />
               </Route>
               <Route path="/clients/:id">
-                <h3>Client Detail</h3>
                 <Clients />
               </Route>
               <Route path="/clients">
-                <h3>All Clients</h3>
                 <Clients />
               </Route>
               <Route path="/">
