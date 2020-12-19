@@ -124,7 +124,7 @@ class Invoice(DjangoObjectType):
     job = graphene.Field(Job)
 
     transportation = graphene.List(LineItem)
-    staff = graphene.List(LineItem)
+    services = graphene.List(LineItem)
     items = graphene.List(LineItem)
 
     def resolve_client(self, info):
@@ -142,10 +142,10 @@ class Invoice(DjangoObjectType):
     def resolve_transportation(self, info):
         return self.line_items.filter(sku__metadata__type="transport")
 
-    def resolve_staff(self, info):
-        return self.line_items.filter(sku__metadata__type="staff")
+    def resolve_services(self, info):
+        return self.line_items.filter(sku__metadata__type="service")
 
-    def resolve_item(self, info):
+    def resolve_items(self, info):
         return self.line_items.filter(sku__metadata__type="item")
 
 
@@ -599,6 +599,10 @@ class SKUFilterSet(django_filters.FilterSet):
 
     tag = django_filters.CharFilter(method="tag_filter")
     sku_type = django_filters.CharFilter(method="type_filter")
+    name = django_filters.CharFilter(method="name_filter")
+
+    def name_filter(self, queryset, name, value):
+        return queryset.filter(name__icontains=value)
 
     def tag_filter(self, queryset, name, value):
         return queryset.filter(metadata__tag=value)
