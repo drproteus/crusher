@@ -10,6 +10,7 @@ import Alert from 'react-bootstrap/Alert';
 import Image from 'react-bootstrap/Image';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
+import Spinner from 'react-bootstrap/Spinner';
 
 import { SKUS, CONTACTS, CLIENTS } from "./queries.jsx";
 
@@ -71,7 +72,7 @@ function ClientContactShort({ client }) {
 function Clients() {
     const { loading, error, data } = useQuery(CLIENTS, { variables: useParams() });
 
-    if (loading) return <p>Loading...</p>;
+    if (loading) return <GraphQLLoading></GraphQLLoading>;
     if (error) return <p>Error :(</p>;
 
     return data.clients.edges.map(({ node }) => (
@@ -90,7 +91,7 @@ function ClientImage({ client, width, height }) {
 function Contacts() {
     const { loading, error, data } = useQuery(CONTACTS, { variables: useParams() });
 
-    if (loading) return <p>Loading...</p>;
+    if (loading) return <GraphQLLoading></GraphQLLoading>;
     if (error) return <p>Error :(</p>;
 
     return data.contacts.edges.map(({ node }) => (
@@ -108,7 +109,7 @@ function Metadata({ inner }) {
     for (var k in inner) {
         if (inner.hasOwnProperty(k)) {
             data.push(
-                <tr><th>{k}</th><td>{JSON.stringify(inner[k])}</td></tr>
+                <tr><th><pre>{k}</pre></th><td><pre>{JSON.stringify(inner[k])}</pre></td></tr>
             );
         }
     };
@@ -116,17 +117,24 @@ function Metadata({ inner }) {
         return [];
     }
     return [
-        <Table size="sm" borderless striped hover>
+        <Table size="sm" borderless hover>
             <tbody>{data}</tbody>
         </Table>
     ];
 }
 
+function GraphQLLoading() {
+    return [
+        <Spinner animation="border" role="status">
+            <span className="sr-only">Loading...</span>
+        </Spinner>
+    ];
+}
 
 function SKURows() {
     const { loading, error, data } = useQuery(SKUS, { variables: useParams() });
 
-    if (loading) return <p>Loading...</p>;
+    if (loading) return <GraphQLLoading></GraphQLLoading>;
     if (error) return <p>Error :(</p>;
 
     return data.skus.edges.map(({ node }) => (
