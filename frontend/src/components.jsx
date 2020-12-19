@@ -25,6 +25,8 @@ import wrenchIcon from '@iconify-icons/uil/wrench';
 import yinYang from '@iconify-icons/uil/yin-yang';
 import ambulanceIcon from '@iconify-icons/uil/ambulance';
 
+import JSONPretty from 'react-json-pretty';
+
 import { SKUS, CONTACTS, CLIENTS } from "./queries.jsx";
 
 
@@ -39,7 +41,7 @@ function ClientDetail({ client }) {
             </Media.Body>
         </Media>,
         <h5>metadata</h5>,
-        <Metadata inner={client.metadata}></Metadata>,
+        <JSONPretty data={client.metadata}></JSONPretty>,
         <Row>
             <Col md={6} className="p-3">
                 <ClientInvoiceList client={client}></ClientInvoiceList>
@@ -112,7 +114,7 @@ function Contacts() {
             <p>
                 {node.fullname}: <Link to={`/contacts/${node.contactId}`}>{node.contactId}</Link>
             </p>
-            <Metadata inner={node.metadata}></Metadata>
+            <JSONPretty data={node.metadata}></JSONPretty>
         </div>
     ));
 }
@@ -247,7 +249,7 @@ function SKURow({ node }) {
         </tr>,
         <tr key={"extra-" + node.skuId}>
             <td></td>
-            <td><Metadata inner={node.metadata}></Metadata></td>
+            <td><JSONPretty data={node.metadata}></JSONPretty></td>
             <td colSpan="2" align="right"><Link to={`/skus/${node.skuId}`}>{node.skuId}</Link></td>
             <td align="center"><ButtonGroup><Button variant="danger">Delete</Button><Button variant="info">Edit</Button></ButtonGroup></td>
         </tr>
