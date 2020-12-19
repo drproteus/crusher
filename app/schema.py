@@ -598,13 +598,17 @@ class InvoiceNode(DjangoObjectType):
         interfaces = (relay.Node,)
         filterset_class = InvoiceFilterSet
 
+    uid = graphene.UUID(source="pk")
     metadata = generic.GenericScalar()
 
 
 class SKUFilterSet(django_filters.FilterSet):
     class Meta:
         model = SKUModel
-        exclude = ["metadata"]
+        fields = {
+            "uid": ["exact"],
+            "default_price": ["exact", "lte", "gte", "lt", "gt"]
+        }
 
     tag = django_filters.CharFilter(method="tag_filter")
     sku_type = django_filters.CharFilter(method="type_filter")
@@ -626,6 +630,7 @@ class SKUNode(DjangoObjectType):
         interfaces = (relay.Node,)
         filterset_class = SKUFilterSet
 
+    uid = graphene.UUID(source="pk")
     metadata = generic.GenericScalar()
 
 
@@ -652,6 +657,7 @@ class ContactNode(DjangoObjectType):
 
     name = graphene.String(source="name")
     fullname = graphene.String(source="fullname")
+    uid = graphene.UUID(source="pk")
     metadata = generic.GenericScalar()
 
 
@@ -661,6 +667,7 @@ class ClientNode(DjangoObjectType):
         interfaces = (relay.Node,)
         filter_fields = {"uid": ["exact"], "company": ["exact", "icontains"]}
 
+    uid = graphene.UUID(source="pk")
     metadata = generic.GenericScalar()
 
 
@@ -670,11 +677,11 @@ class Query(graphene.ObjectType):
     clients = DjangoFilterConnectionField(ClientNode)
     contacts = DjangoFilterConnectionField(ContactNode)
 
-    invoice = graphene.Field(Invoice, id=graphene.ID(required=True))
-    sku = graphene.Field(SKU, id=graphene.ID(required=True))
-    service_sku = graphene.Field(ServiceSKU, id=graphene.ID(required=True))
-    client = graphene.Field(Client, id=graphene.ID(required=True))
-    contact = graphene.Field(Contact, id=graphene.ID(required=True))
+    invoice = graphene.Field(Invoice, uid=graphene.ID(required=True))
+    sku = graphene.Field(SKU, uid=graphene.ID(required=True))
+    service_sku = graphene.Field(ServiceSKU, uid=graphene.ID(required=True))
+    client = graphene.Field(Client, uid=graphene.ID(required=True))
+    contact = graphene.Field(Contact, uid=graphene.ID(required=True))
 
     def resolve_invoice(root, info, uid):
         return InvoiceModel.objects.get(pk=uid)

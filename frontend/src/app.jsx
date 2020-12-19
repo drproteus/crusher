@@ -52,19 +52,19 @@ const App = () => (
               <Route path="/skus/by-tag/:tag">
                 <SKUs />
               </Route>
-              <Route path="/skus/:id">
+              <Route path="/skus/:uid">
                 <SKUs />
               </Route>
               <Route path="/skus">
                 <SKUs />
               </Route>
-              <Route path="/contacts/:id">
+              <Route path="/contacts/:uid">
                 <Contacts />
               </Route>
               <Route path="/contacts">
                 <Contacts />
               </Route>
-              <Route path="/clients/:id">
+              <Route path="/clients/:uid">
                 <Clients />
               </Route>
               <Route path="/clients">

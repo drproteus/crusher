@@ -151,7 +151,7 @@ class TransportationManager(SKUManager):
 
 
 class SKU(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    uid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(blank=True, max_length=256)
     metadata = models.JSONField()
     default_quantity = models.DecimalField(

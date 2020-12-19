@@ -93,8 +93,8 @@ function ClientContactShort({ client }) {
 function ClientBreadcrumbs() {
     let params = useParams();
     let crumbs = ["Clients"]
-    if (params.id) {
-        crumbs.push(params.id);
+    if (params.uid) {
+        crumbs.push(params.uid);
     }
     return crumbs.map(c => <Breadcrumb.Item>{c}</Breadcrumb.Item>);
 }
@@ -222,8 +222,8 @@ function MainNav() {
 function SKUBreadcrumbs() {
     let params = useParams();
     let crumbs = ["SKUs"]
-    if (params.id) {
-        crumbs.push(params.id);
+    if (params.uid) {
+        crumbs.push(params.uid);
     } else if (params.tag) {
         crumbs.push("tagged");
         crumbs.push(params.tag);
