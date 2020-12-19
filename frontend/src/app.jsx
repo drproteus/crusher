@@ -35,7 +35,7 @@ const client = new ApolloClient({
 const App = () => (
   <ApolloProvider client={client}>
     <Router>
-      <Container fluid>
+      <Container>
         <h2>CRUSHER 🚀</h2>
         <Row>
           <Col md={2}><MainNav></MainNav></Col>
