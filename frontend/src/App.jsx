@@ -8,7 +8,8 @@ import {
   BrowserRouter as Router,
   Switch,
   Route,
-  Link
+  Link,
+  useParams
 } from "react-router-dom";
 
 
@@ -77,6 +78,9 @@ const App = () => (
           <Route path="/skus">
             <SKUs />
           </Route>
+          <Route path="/contacts/:id">
+            <Contact />
+          </Route>
           <Route path="/contacts">
             <Contacts />
           </Route>
@@ -120,10 +124,26 @@ function Contacts() {
   return data.contacts.edges.map(({ node }) => (
     <div key={node.contactId}>
       <p>
-        {node.name}
+        {node.name}: <Link to={`/contacts/${node.contactId}`}>{node.contactId}</Link>
       </p>
     </div>
   ));
+}
+
+function Contact() {
+  let contactId = useParams().id;
+  const { loading, error, data } = useQuery(gql`query{contact(id: "${contactId}"){id,metadata,fullname,}}`);
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Error :(</p>;
+
+  return <div>
+    <h2>{data.contact.fullname}</h2>
+    <Metadata inner={data.contact.metadata}></Metadata>
+  </div>;
+}
+
+function Metadata(data) {
+  return <div><pre>{JSON.stringify(data.inner, null, 2)}</pre></div>
 }
 
 
