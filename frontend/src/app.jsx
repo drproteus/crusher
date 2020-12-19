@@ -4,6 +4,7 @@ import ReactDOM from 'react-dom';
 import Container from 'react-bootstrap/Container';
 import Col from 'react-bootstrap/Col';
 import Row from 'react-bootstrap/Row';
+import Breadcrumb from 'react-bootstrap/Breadcrumb';
 
 import { Icon, InlineIcon } from '@iconify/react';
 import shipIcon from '@iconify-icons/uil/ship';
@@ -46,19 +47,15 @@ const App = () => (
           <Col>
             <Switch>
               <Route path="/skus/by-type/:skuType">
-                <h3>SKUs by Type</h3>
                 <SKUs />
               </Route>
               <Route path="/skus/by-tag/:tag">
-                <h3>SKUs by Tag</h3>
                 <SKUs />
               </Route>
               <Route path="/skus/:id">
-                <h3>SKU Detail</h3>
                 <SKUs />
               </Route>
               <Route path="/skus">
-                <h3>All SKUs</h3>
                 <SKUs />
               </Route>
               <Route path="/contacts/:id">

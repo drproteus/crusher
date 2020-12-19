@@ -11,6 +11,7 @@ import Image from 'react-bootstrap/Image';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Spinner from 'react-bootstrap/Spinner';
+import Breadcrumb from 'react-bootstrap/Breadcrumb';
 
 import { Icon, InlineIcon } from '@iconify/react';
 import shipIcon from '@iconify-icons/uil/ship';
@@ -197,22 +198,42 @@ function MainNav() {
     </Nav>;
 }
 
+function SKUBreadcrumbs() {
+    let params = useParams();
+    let crumbs = ["SKUs"]
+    if (params.id) {
+        crumbs.push(params.id);
+    } else if (params.tag) {
+        crumbs.push("tagged");
+        crumbs.push(params.tag);
+    } else if (params.skuType) {
+        crumbs.push(params.skuType);
+    }
+    return crumbs.map(c => <Breadcrumb.Item>{c}</Breadcrumb.Item>);
+}
+
 function SKUs() {
-    return <Table striped bordered hover>
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Type</th>
-                <th>Units</th>
-                <th>Default Price</th>
-                <th>Default Quantity</th>
-            </tr>
-        </thead>
-        <tbody>
-            <SKURows></SKURows>
-        </tbody>
-        <tfoot></tfoot>
-    </Table>
+
+    return [
+        <Breadcrumb>
+            <SKUBreadcrumbs></SKUBreadcrumbs>
+        </Breadcrumb>,
+        <Table striped bordered hover>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Type</th>
+                    <th>Units</th>
+                    <th>Default Price</th>
+                    <th>Default Quantity</th>
+                </tr>
+            </thead>
+            <tbody>
+                <SKURows></SKURows>
+            </tbody>
+            <tfoot></tfoot>
+        </Table>
+    ]
 }
 
 function SKURow({ node }) {
