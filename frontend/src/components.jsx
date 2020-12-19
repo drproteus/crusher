@@ -33,7 +33,7 @@ function Clients() {
     ));
 }
 
-function ClientImage({ client, width, height}) {
+function ClientImage({ client, width, height }) {
     let placeholder = client.metadata.profile_image_url || "http://placekitten.com/200/200";
     return <img width={width} height={height} src={placeholder}></img>;
 }
@@ -80,7 +80,7 @@ export { Clients, Contacts, Metadata, SKUs, Home, MainNav };
 
 
 function MainNav() {
-    return <Nav fill variant="pills" activeKey={"/" + window.location.pathname.split("/")[1]}>
+    return <Nav className="flex-column" variant="pills" activeKey={"/" + window.location.pathname.split("/")[1]}>
         <Nav.Item>
             <Nav.Link href="/">Home</Nav.Link>
         </Nav.Item>
@@ -100,37 +100,34 @@ function SKUs() {
     return <Table striped bordered hover>
         <thead>
             <tr>
-                <th>SKU ID</th>
                 <th>Name</th>
                 <th>Type</th>
                 <th>Units</th>
                 <th>Default Price</th>
                 <th>Default Quantity</th>
-                <th>Minimum Quantity</th>
-                <th>Maximum Quantity</th>
-                <th>Minimum Price</th>
-                <th>Maximum Price</th>
-                <th>Metadata</th>
-                <th>Actions</th>
             </tr>
         </thead>
-        <SKURows></SKURows>
+        <tbody>
+            <SKURows></SKURows>
+        </tbody>
+        <tfoot></tfoot>
     </Table>
 }
 
 function SKURow({ node }) {
-    return <tr>
-        <td>{node.skuId}</td>
-        <td>{node.name || node.metadata.name || "???"}</td>
-        <td>{node.metadata.type}</td>
-        <td>{node.units}</td>
-        <td>{node.defaultPrice}</td>
-        <td>{node.defaultQuantity}</td>
-        <td>{node.minimumQuantity}</td>
-        <td>{node.maximumQuantity}</td>
-        <td>{node.minimumPrice}</td>
-        <td>{node.maximumPrice}</td>
-        <td><Metadata inner={node.metadata}></Metadata></td>
-        <td><ButtonGroup><Button variant="danger">Delete</Button><Button varian="info">Edit</Button></ButtonGroup></td>
-    </tr>
+    return [
+        <tr key={node.skuId}>
+            <td>{node.name || node.metadata.name || "???"}</td>
+            <td><Link to={"/skus/by-type/" + node.metadata.type}>{node.metadata.type}</Link></td>
+            <td>{node.units}</td>
+            <td>{node.defaultPrice}</td>
+            <td>{node.defaultQuantity}</td>
+        </tr>,
+        <tr key={"extra-" + node.skuId}>
+            <td></td>
+            <td><Metadata inner={node.metadata}></Metadata></td>
+            <td colSpan="2" align="right"><Link to={`/skus/${node.skuId}`}>{node.skuId}</Link></td>
+            <td align="center"><ButtonGroup><Button variant="danger">Delete</Button><Button variant="info">Edit</Button></ButtonGroup></td>
+        </tr>
+    ]
 }
