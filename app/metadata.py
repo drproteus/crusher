@@ -55,3 +55,7 @@ class VoyagePointSchema(Schema):
 
 class JobMetadataSchema(Schema):
     voyage = fields.Nested(VoyagePointSchema, many=True)
+
+
+class CreditMetadataSchema(Schema):
+    line_item_ids = fields.List(fields.String, many=True, missing=lambda: [])

@@ -7,6 +7,7 @@ from app.metadata import (
     ItemMetadataSchema,
     TransportMetadataSchema,
     ServiceMetadataSchema,
+    CreditMetadataSchema,
 )
 import uuid
 
@@ -296,22 +297,27 @@ class LineItem(models.Model):
 
     def save(self, *args, **kwargs):
         self.subtotal = self.price * self.quantity
-        return super().save()
+        self.invoice.update_balances()
+        return super().save(*args, **kwargs)
 
 
 class Credit(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    contact = models.ForeignKey(Contact, on_delete=models.SET_NULL, null=True, related_name="+")
     invoice = models.ForeignKey(
         Invoice, on_delete=models.CASCADE, related_name="credits"
     )
     amount = models.DecimalField(max_digits=32, decimal_places=2)
     memo = models.TextField(blank=True)
-    line_item = models.ForeignKey(
-        LineItem, on_delete=models.SET_NULL, null=True, related_name="applied_credits"
-    )
+    metadata = models.JSONField(null=True)
     posted_date = models.DateTimeField(auto_now_add=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f"INV_ID:{self.invoice.id}|{self.created_at}|AMOUNT:{self.subtotal}|POSTED:{self.posted_date}|{self.id}"
+
+    def save(self, *args, **kwargs):
+        self.invoice.update_balances()
+        self.metadata = CreditMetadataSchema().load(self.metadata)
+        return super().save(*args, **kwargs)
