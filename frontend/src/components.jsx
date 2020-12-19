@@ -6,18 +6,66 @@ import Table from 'react-bootstrap/Table';
 import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import Media from 'react-bootstrap/Media';
+import Alert from 'react-bootstrap/Alert';
+import Image from 'react-bootstrap/Image';
+import Row from 'react-bootstrap/Row';
+import Col from 'react-bootstrap/Col';
 
 import { SKUS, CONTACTS, CLIENTS } from "./queries.jsx";
 
 
 function ClientDetail({ client }) {
-    return <Media>
-        <ClientImage client={client} width={64} height={64}></ClientImage>
-        <Media.Body>
-            <p>{client.company}: <Link to={"/clients/" + client.clientId}>{client.clientId}</Link></p>
-            <Metadata inner={client.metadata}></Metadata>
-        </Media.Body>
-    </Media>;
+    let details = [
+        <Media>
+            <ClientImage client={client} width={200} height={200}></ClientImage>
+            <Media.Body style={{ marginLeft: 10 }}>
+                <h4>{client.company}</h4>
+                <p className="text-muted"><Link to={"/clients/" + client.clientId}>{client.clientId}</Link></p>
+                <pre>ADD MORE STUFF HERE</pre>
+            </Media.Body>
+        </Media>,
+        <h5>metadata</h5>,
+        <Metadata inner={client.metadata}></Metadata>,
+        <Row>
+            <Col md={6} className="p-3">
+                <ClientInvoiceList client={client}></ClientInvoiceList>
+            </Col>
+            <Col md={6} className="p-3">
+                <ClientContactShort client={client}></ClientContactShort>
+            </Col>
+        </Row>
+    ];
+    return details;
+}
+
+function ClientInvoiceList({ client }) {
+    let data = [<h5>Invoices</h5>];
+    if (client.invoices.edges.length < 1) {
+        data.push(<Alert>no invoices found for client</Alert>);
+    } else {
+        for (invoice in client.invoices.edges) {
+            data.push(invoice.id)
+        }
+    }
+    return data
+}
+
+function ClientContactShort({ client }) {
+    if (!client.contact) {
+        return [];
+    }
+    return [
+        <Alert variant="info">
+            <h5>Contact</h5>
+            <p>
+                {client.contact.primaryEmail}
+            </p>
+            <p>
+                {client.contact.name}
+            </p>
+            <Link to={"/contacts/" + client.contact.id}><Button>View</Button></Link>
+        </Alert>
+    ];
 }
 
 function Clients() {
@@ -35,7 +83,7 @@ function Clients() {
 
 function ClientImage({ client, width, height }) {
     let placeholder = client.metadata.profile_image_url || "http://placekitten.com/200/200";
-    return <img width={width} height={height} src={placeholder}></img>;
+    return <Image width={width} height={height} src={placeholder} thumbnail></Image>;
 }
 
 
@@ -56,7 +104,22 @@ function Contacts() {
 }
 
 function Metadata({ inner }) {
-    return <div><pre>{JSON.stringify(inner, null, 2)}</pre></div>
+    let data = []
+    for (var k in inner) {
+        if (inner.hasOwnProperty(k)) {
+            data.push(
+                <tr><th>{k}</th><td>{JSON.stringify(inner[k])}</td></tr>
+            );
+        }
+    };
+    if (data.length < 1) {
+        return [];
+    }
+    return [
+        <Table size="sm" borderless striped hover>
+            <tbody>{data}</tbody>
+        </Table>
+    ];
 }
 
 

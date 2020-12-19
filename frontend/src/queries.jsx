@@ -12,6 +12,19 @@ query ($id: UUID, $company: String, $companyLike: String) {
           id,
           name,
           primaryEmail
+        },
+        invoices {
+          edges {
+            node {
+              invoiceId,
+              paidBalance,
+              initialBalance,
+              lineItems {
+                id,
+                subtotal
+              }
+            }
+          }
         }
       }
     }
