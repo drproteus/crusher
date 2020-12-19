@@ -12,6 +12,18 @@ import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Spinner from 'react-bootstrap/Spinner';
 
+import { Icon, InlineIcon } from '@iconify/react';
+import shipIcon from '@iconify-icons/uil/ship';
+import priceTagAlt from '@iconify-icons/uil/pricetag-alt';
+import homeAlt from '@iconify-icons/uil/home-alt';
+import suitcaseIcon from '@iconify-icons/uil/suitcase';
+import userIcon from '@iconify-icons/uil/user';
+import dollarSign from '@iconify-icons/uil/dollar-sign';
+import commentAlt from '@iconify-icons/uil/comment-alt';
+import wrenchIcon from '@iconify-icons/uil/wrench';
+import yinYang from '@iconify-icons/uil/yin-yang';
+import ambulanceIcon from '@iconify-icons/uil/ambulance';
+
 import { SKUS, CONTACTS, CLIENTS } from "./queries.jsx";
 
 
@@ -153,16 +165,34 @@ export { Clients, Contacts, Metadata, SKUs, Home, MainNav };
 function MainNav() {
     return <Nav className="flex-column" variant="pills" activeKey={"/" + window.location.pathname.split("/")[1]}>
         <Nav.Item>
-            <Nav.Link href="/">Home</Nav.Link>
+            <Nav.Link href="/"><InlineIcon icon={homeAlt}></InlineIcon> Home</Nav.Link>
         </Nav.Item>
         <Nav.Item>
-            <Nav.Link href="/skus">SKUs</Nav.Link>
+            <Nav.Link href="/skus"><InlineIcon icon={priceTagAlt}></InlineIcon> SKUs</Nav.Link>
         </Nav.Item>
         <Nav.Item>
-            <Nav.Link href="/contacts">Contacts</Nav.Link>
+            <Nav.Link href="/contacts"><InlineIcon icon={userIcon}></InlineIcon> Contacts</Nav.Link>
         </Nav.Item>
         <Nav.Item>
-            <Nav.Link href="/clients">Clients</Nav.Link>
+            <Nav.Link href="/clients"><InlineIcon icon={suitcaseIcon}></InlineIcon> Clients</Nav.Link>
+        </Nav.Item>
+        <Nav.Item>
+            <Nav.Link href="/vessels"><InlineIcon icon={shipIcon}></InlineIcon> Vessels</Nav.Link>
+        </Nav.Item>
+        <Nav.Item>
+            <Nav.Link href="/requests"><InlineIcon icon={commentAlt}></InlineIcon> Requests</Nav.Link>
+        </Nav.Item>
+        <Nav.Item>
+            <Nav.Link href="/jobs"><InlineIcon icon={ambulanceIcon}></InlineIcon> Jobs</Nav.Link>
+        </Nav.Item>
+        <Nav.Item>
+            <Nav.Link href="/invoices"><InlineIcon icon={dollarSign}></InlineIcon> Invoices</Nav.Link>
+        </Nav.Item>
+        <Nav.Item>
+            <Nav.Link href="/help"><InlineIcon icon={yinYang}></InlineIcon> Help</Nav.Link>
+        </Nav.Item>
+        <Nav.Item>
+            <Nav.Link href="/settings"><InlineIcon icon={wrenchIcon}></InlineIcon> Settings</Nav.Link>
         </Nav.Item>
     </Nav>;
 }

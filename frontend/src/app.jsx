@@ -5,6 +5,10 @@ import Container from 'react-bootstrap/Container';
 import Col from 'react-bootstrap/Col';
 import Row from 'react-bootstrap/Row';
 
+import { Icon, InlineIcon } from '@iconify/react';
+import shipIcon from '@iconify-icons/uil/ship';
+import priceTagAlt from '@iconify-icons/uil/pricetag-alt';
+
 import { ApolloProvider } from '@apollo/react-hooks';
 import { ApolloClient, createHttpLink, InMemoryCache } from '@apollo/client';
 
@@ -36,7 +40,7 @@ const App = () => (
   <ApolloProvider client={client}>
     <Router>
       <Container>
-        <h2>CRUSHER 🚀</h2>
+        <h2><InlineIcon icon={shipIcon}> </InlineIcon>crusher.beta</h2>
         <Row>
           <Col md={2}><MainNav></MainNav></Col>
           <Col>
