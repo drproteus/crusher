@@ -31,143 +31,7 @@ from app.models import (
     Attachment as AttachmentModel,
 )
 
-class Attachment(DjangoObjectType):
-    class Meta:
-        model = AttachmentModel
-
-    metadata = generic.GenericScalar()
-    url = graphene.String()
-
-    def resolve_url(self, info):
-        return self.attached_file.url
-
-
-class Contact(DjangoObjectType):
-    class Meta:
-        model = ContactModel
-
-    metadata = generic.GenericScalar()
-    name = graphene.String()
-    fullname = graphene.String()
-    image_url = graphene.String()
-    attachments = graphene.List(Attachment)
-
-    def resolve_name(self, info):
-        return self.name
-
-    def resolve_fullname(self, info):
-        return self.fullname
-
-    def resolve_image_url(self, info):
-        if not self.image:
-            return ""
-        return self.image.url
-
-    def resolve_attachments(self, info):
-        return self.attachments.all()
-
-
-class Client(DjangoObjectType):
-    class Meta:
-        model = ClientModel
-
-    metadata = generic.GenericScalar()
-
-
-class Vessel(DjangoObjectType):
-    class Meta:
-        model = VesselModel
-
-    client = graphene.Field(Client)
-    metadata = generic.GenericScalar()
-
-    def resolve_client(self, info):
-        return self.client
-
-
-class Task(DjangoObjectType):
-    class Meta:
-        model = TaskModel
-
-    client = graphene.Field(Client)
-    metadata = generic.GenericScalar()
-
-    def resolve_client(self, info):
-        return self.client
-
-
-class Job(DjangoObjectType):
-    class Meta:
-        model = JobModel
-
-    vessel = graphene.Field(Vessel)
-    origin_task = graphene.Field(Task)
-    metadata = generic.GenericScalar()
-
-
-class SKU(DjangoObjectType):
-    class Meta:
-        model = SKUModel
-
-    metadata = generic.GenericScalar()
-
-
-class ServiceSKU(DjangoObjectType):
-    class Meta:
-        model = ServiceSKUModel
-
-    metadata = generic.GenericScalar()
-
-
-class LineItem(DjangoObjectType):
-    class Meta:
-        model = LineItemModel
-
-    sku = graphene.Field(SKU)
-
-    def resolve_sku(self, info):
-        return self.sku
-
-
-class Credit(DjangoObjectType):
-    class Meta:
-        model = CreditModel
-
-
-class Invoice(DjangoObjectType):
-    class Meta:
-        model = InvoiceModel
-
-    line_items = graphene.List(LineItem)
-    credits = graphene.List(Credit)
-    client = graphene.Field(Client)
-
-    job = graphene.Field(Job)
-
-    transportation = graphene.List(LineItem)
-    services = graphene.List(LineItem)
-    items = graphene.List(LineItem)
-
-    def resolve_client(self, info):
-        return self.client
-
-    def resolve_job(self, info):
-        return self.job
-
-    def resolve_line_items(self, info):
-        return self.line_items.all()
-
-    def resolve_credits(self, info):
-        return self.credits.all()
-
-    def resolve_transportation(self, info):
-        return self.line_items.filter(sku__metadata__type="transport")
-
-    def resolve_services(self, info):
-        return self.line_items.filter(sku__metadata__type="service")
-
-    def resolve_items(self, info):
-        return self.line_items.filter(sku__metadata__type="item")
+from app.nodes import *
 
 
 class ContactInput(graphene.InputObjectType):
@@ -187,7 +51,7 @@ class ModifyContactMutation(graphene.Mutation):
         data = ContactInput(required=True)
         uid = graphene.ID()
 
-    contact = graphene.Field(lambda: Contact)
+    contact = graphene.Field(ContactNode)
 
     @classmethod
     def mutate(
@@ -239,7 +103,7 @@ class DeleteClientContact(graphene.Mutation):
     class Arguments:
         uid = graphene.ID(required=True)
 
-    client = graphene.Field(lambda: Client)
+    client = graphene.Field(ClientNode)
 
     @classmethod
     def mutate(cls, root, info, uid):
@@ -254,7 +118,7 @@ class ModifyClientMutation(graphene.Mutation):
         data = ClientInput(required=True)
         uid = graphene.ID()
 
-    client = graphene.Field(lambda: Client)
+    client = graphene.Field(ClientNode)
 
     @classmethod
     def mutate(
@@ -287,7 +151,7 @@ class ModifyVesselMutation(graphene.Mutation):
         data = VesselInput(required=True)
         uid = graphene.ID()
 
-    vessel = graphene.Field(lambda: Vessel)
+    vessel = graphene.Field(VesselNode)
 
     @classmethod
     def mutate(
@@ -319,7 +183,7 @@ class ModifyJobMutation(graphene.Mutation):
         data = JobInput(required=True)
         uid = graphene.ID()
 
-    job = graphene.Field(lambda: Job)
+    job = graphene.Field(JobNode)
 
     @classmethod
     def mutate(cls, root, info, data, uid=None):
@@ -393,7 +257,7 @@ class ModifySKUMutation(graphene.Mutation):
         data = SKUInput(required=True)
         uid = graphene.ID()
 
-    sku = graphene.Field(SKU)
+    sku = graphene.Field(SKUNode)
 
     @classmethod
     def mutate(cls, root, info, data, uid=None):
@@ -412,7 +276,7 @@ class BeginInvoiceMutation(graphene.Mutation):
         due_date = graphene.DateTime()
         metadata = generic.GenericScalar()
 
-    invoice = graphene.Field(Invoice)
+    invoice = graphene.Field(InvoiceNode)
 
     @classmethod
     def mutate(cls, root, info, job_uid=None, due_date=None, metadata=None):
@@ -428,7 +292,7 @@ class SetInvoiceStateMutation(graphene.Mutation):
         uid = graphene.ID(required=True)
         state = graphene.Int(required=True)
 
-    invoice = graphene.Field(Invoice)
+    invoice = graphene.Field(InvoiceNode)
 
     @classmethod
     def mutate(cls, root, info, uid, state):
@@ -443,7 +307,7 @@ class SetInvoiceMetadataMutation(graphene.Mutation):
         uid = graphene.ID(required=True)
         metadata = generic.GenericScalar(required=True)
 
-    invoice = graphene.Field(Invoice)
+    invoice = graphene.Field(InvoiceNode)
 
     @classmethod
     def mutate(cls, root, info, uid, metadata):
@@ -460,7 +324,7 @@ class AddLineItemMutation(graphene.Mutation):
         price = graphene.Float()
         quantity = graphene.Float()
 
-    line_item = graphene.Field(LineItem)
+    line_item = graphene.Field(LineItemNode)
 
     @classmethod
     def mutate(cls, root, info, invoice_uid, sku_uid, price=None, quantity=None):
@@ -480,7 +344,7 @@ class DeleteLineItemMutation(graphene.Mutation):
     class Arguments:
         uid = graphene.ID(required=True)
 
-    invoice = graphene.Field(Invoice)
+    invoice = graphene.Field(InvoiceNode)
 
     @classmethod
     def mutate(cls, root, info, uid):
@@ -499,7 +363,7 @@ class ApplyCreditMutation(graphene.Mutation):
         memo = graphene.String()
         metadata = generic.GenericScalar()
 
-    credit = graphene.Field(Credit)
+    credit = graphene.Field(CreditNode)
 
     @classmethod
     def mutate(cls, root, info, invoice_uid, amount, memo="", metadata=None):
@@ -514,7 +378,7 @@ class DeleteCreditMutation(graphene.Mutation):
     class Arguments:
         credit_uid = graphene.ID(required=True)
 
-    invoice = graphene.Field(Invoice)
+    invoice = graphene.Field(InvoiceNode)
 
     @classmethod
     def mutate(cls, root, info, credit_uid):
@@ -607,121 +471,6 @@ class Mutations(graphene.ObjectType):
     delete_credit = DeleteCreditMutation.Field()
 
 
-class InvoiceFilterSet(django_filters.FilterSet):
-    class Meta:
-        model = InvoiceModel
-        exclude = ["metadata"]
-
-
-class InvoiceNode(DjangoObjectType):
-    class Meta:
-        model = InvoiceModel
-        interfaces = (relay.Node,)
-        filterset_class = InvoiceFilterSet
-
-    uid = graphene.UUID(source="pk")
-    metadata = generic.GenericScalar()
-
-
-class SKUFilterSet(django_filters.FilterSet):
-    class Meta:
-        model = SKUModel
-        fields = {
-            "uid": ["exact"],
-            "default_price": ["exact", "lte", "gte", "lt", "gt"]
-        }
-
-    tag = django_filters.CharFilter(method="tag_filter")
-    sku_type = django_filters.CharFilter(method="type_filter")
-    name = django_filters.CharFilter(method="name_filter")
-
-    def name_filter(self, queryset, name, value):
-        return queryset.filter(name__icontains=value)
-
-    def tag_filter(self, queryset, name, value):
-        return queryset.filter(metadata__tag=value)
-
-    def type_filter(self, queryset, name, value):
-        return queryset.filter(metadata__type=value)
-
-
-class SKUNode(DjangoObjectType):
-    class Meta:
-        model = SKUModel
-        interfaces = (relay.Node,)
-        filterset_class = SKUFilterSet
-
-    uid = graphene.UUID(source="pk")
-    metadata = generic.GenericScalar()
-
-
-class ContactFilterSet(django_filters.FilterSet):
-    class Meta:
-        model = ContactModel
-        exclude = ["metadata"]
-        fields = {
-            "uid": ["exact"],
-            "first_name": ["exact", "icontains"],
-            "last_name": ["exact", "icontains"],
-            "role": ["exact", "icontains"],
-            "billing_address": ["icontains"],
-            "mailing_address": ["icontains"],
-            "primary_email": ["exact", "icontains"],
-        }
-
-
-class ContactNode(DjangoObjectType):
-    class Meta:
-        model = ContactModel
-        interfaces = (relay.Node,)
-        filterset_class = ContactFilterSet
-
-    name = graphene.String(source="name")
-    fullname = graphene.String(source="fullname")
-    uid = graphene.UUID(source="pk")
-    metadata = generic.GenericScalar()
-
-    image_url = graphene.String()
-    attachments = graphene.List(Attachment)
-
-    def resolve_image_url(self, info):
-        if not self.image:
-            return ""
-        return self.image.url
-
-    def resolve_attachments(self, info):
-        return self.attachments.all()
-
-
-class ClientNode(DjangoObjectType):
-    class Meta:
-        model = ClientModel
-        interfaces = (relay.Node,)
-        filter_fields = {"uid": ["exact"], "company": ["exact", "icontains"]}
-
-    uid = graphene.UUID(source="pk")
-    metadata = generic.GenericScalar()
-
-
-class AttachmentNode(DjangoObjectType):
-    class Meta:
-        model = AttachmentModel
-        interfaces = (relay.Node,)
-        filter_fields = {
-            "uid": ["exact"]
-        }
-
-    metadata = generic.GenericScalar()
-    url = graphene.String()
-    attached_to = graphene.String()
-
-    def resolve_url(self, info):
-        return self.attached_file.url
-
-    def resolve_attached_to(self, info):
-        return self.content_object.__class__.__name__
-
-
 class Query(graphene.ObjectType):
     invoices = DjangoFilterConnectionField(InvoiceNode)
     skus = DjangoFilterConnectionField(SKUNode)
@@ -729,20 +478,16 @@ class Query(graphene.ObjectType):
     contacts = DjangoFilterConnectionField(ContactNode)
     attachments = DjangoFilterConnectionField(AttachmentNode)
 
-    invoice = graphene.Field(Invoice, uid=graphene.ID(required=True))
-    sku = graphene.Field(SKU, uid=graphene.ID(required=True))
-    service_sku = graphene.Field(ServiceSKU, uid=graphene.ID(required=True))
-    client = graphene.Field(Client, uid=graphene.ID(required=True))
-    contact = graphene.Field(Contact, uid=graphene.ID(required=True))
+    invoice = graphene.Field(InvoiceNode, uid=graphene.ID(required=True))
+    sku = graphene.Field(SKUNode, uid=graphene.ID(required=True))
+    client = graphene.Field(ClientNode, uid=graphene.ID(required=True))
+    contact = graphene.Field(ContactNode, uid=graphene.ID(required=True))
 
     def resolve_invoice(root, info, uid):
         return InvoiceModel.objects.get(pk=uid)
 
     def resolve_sku(root, info, uid):
         return SKUModel.objects.get(pk=uid)
-
-    def resolve_service_sku(root, info, uid):
-        return ServiceSKUModel.objects.get(pk=uid)
 
     def resolve_client(root, info, uid):
         return ClientModel.objects.get(pk=uid)
