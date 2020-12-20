@@ -29,6 +29,7 @@ import timesCircle from "@iconify-icons/uil/times-circle";
 import folderOpen from "@iconify-icons/uil/folder-open";
 
 import JSONPretty from "react-json-pretty";
+import NumberFormat from "react-number-format";
 
 import { SKUS, CONTACTS, CLIENTS } from "./queries.jsx";
 
@@ -310,7 +311,15 @@ function SKURow({ node }) {
           {node.metadata.type}
         </Link>
       </td>
-      <td>{node.defaultPrice}</td>
+      <td>
+        <NumberFormat
+          value={node.defaultPrice}
+          decimalScale={2}
+          fixedDecimalScale={true}
+          displayType={"text"}
+          prefix={"$"}
+        ></NumberFormat>
+      </td>
       <td>{node.defaultQuantity}</td>
       <td>{node.units}</td>
       <td align="center">
@@ -327,7 +336,7 @@ function SKURow({ node }) {
         </ButtonGroup>
       </td>
     </tr>,
-    <tr key={"extra-" + node.uid}>
+    <tr key={"extra-" + node.uid} className="alert alert-light">
       <td>
         <SKUThumb metadata={node.metadata}></SKUThumb>
       </td>
