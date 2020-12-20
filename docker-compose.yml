@@ -11,6 +11,8 @@ services:
       MYSQL_USER: crusher
       MYSQL_PASSWORD: $MYSQL_PASSWORD
       MYSQL_DATABASE: crusher
+      AWS_ACCESS_KEY: $MINIO_ACCESS_KEY
+      AWS_SECRET_KEY: $MINIO_SECRET_KEY
     restart: unless-stopped
     # command: "gunicorn -b 0.0.0.0:8080 crusher.wsgi"
     command: "python manage.py runserver 0.0.0.0:8080"
@@ -38,6 +40,15 @@ services:
   rabbitmq:
     image: rabbitmq:3
     restart: unless-stopped
+  storage:
+    image: minio/minio
+    volumes:
+      - ./media:/data
+    environment:
+      MINIO_ACCESS_KEY: $MINIO_ACCESS_KEY
+      MINIO_SECRET_KEY: $MINIO_SECRET_KEY
+    command: ["server", "/data"]
 volumes:
   mariadb_data:
   assets:
+  bucket_data:
