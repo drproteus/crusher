@@ -334,9 +334,11 @@ function SKURow({ node }) {
       <td>{node.units}</td>
       <td align="center">
         <ButtonGroup>
-          <Button variant="info">
-            <Icon icon={folderOpen}></Icon>
-          </Button>
+          <Link to={`/skus/${node.uid}`}>
+            <Button variant="info">
+              <Icon icon={folderOpen}></Icon>
+            </Button>
+          </Link>
           <Button variant="warning">
             <Icon icon={editIcon}></Icon>
           </Button>
