@@ -125,6 +125,8 @@ class UploadContactImageView(View):
         except Contact.DoesNotExist:
             raise Http404
         file_obj = request.FILES.get("image")
+        if not file_obj:
+            return HttpResponse(status=420)
         file_obj.name = f"contact-image-{contact_uid}"
 
         contact.image = file_obj
@@ -141,6 +143,8 @@ class UploadClientImageView(View):
         except Client.DoesNotExist:
             raise Http404
         file_obj = request.FILES.get("image")
+        if not file_obj:
+            return HttpResponse(status=420)
         file_obj.name = f"client-image-{client_uid}"
 
         client.image = file_obj
@@ -157,6 +161,8 @@ class UploadSKUImageView(View):
         except SKU.DoesNotExist:
             raise Http404
         file_obj = request.FILES.get("image")
+        if not file_obj:
+            return HttpResponse(status=420)
         file_obj.name = f"sku-image-{sku_uid}"
 
         sku.image = file_obj

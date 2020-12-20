@@ -281,9 +281,11 @@ class BeginInvoiceMutation(graphene.Mutation):
     @classmethod
     def mutate(cls, root, info, job_uid=None, due_date=None, metadata=None):
         metadata = metadata or {}
-        invoice = InvoiceModel.objects.create(
-            due_date=due_date, metadate=metadata, job_uid=job_uid
-        )
+        try:
+            job = JobModel.objects.get(pk=job_uid)
+            job.invoices.create(due_date=due_date, metadata=metadata)
+        except JobModel.DoesNotExist:
+            invoice = InvoiceModel.objects.create(due_date=due_date, metadata=metadata)
         return BeginInvoiceMutation(invoice=invoice)
 
 
