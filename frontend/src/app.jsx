@@ -1,17 +1,17 @@
-import React, { Fragment } from 'react';
-import ReactDOM from 'react-dom';
+import React, { Fragment } from "react";
+import ReactDOM from "react-dom";
 
-import Container from 'react-bootstrap/Container';
-import Col from 'react-bootstrap/Col';
-import Row from 'react-bootstrap/Row';
-import Breadcrumb from 'react-bootstrap/Breadcrumb';
+import Container from "react-bootstrap/Container";
+import Col from "react-bootstrap/Col";
+import Row from "react-bootstrap/Row";
+import Breadcrumb from "react-bootstrap/Breadcrumb";
 
-import { Icon, InlineIcon } from '@iconify/react';
-import shipIcon from '@iconify-icons/uil/ship';
-import priceTagAlt from '@iconify-icons/uil/pricetag-alt';
+import { Icon, InlineIcon } from "@iconify/react";
+import shipIcon from "@iconify-icons/uil/ship";
+import priceTagAlt from "@iconify-icons/uil/pricetag-alt";
 
-import { ApolloProvider } from '@apollo/react-hooks';
-import { ApolloClient, createHttpLink, InMemoryCache } from '@apollo/client';
+import { ApolloProvider } from "@apollo/react-hooks";
+import { ApolloClient, createHttpLink, InMemoryCache } from "@apollo/client";
 
 import { SKUs, Clients, Contacts, Home, MainNav } from "./components.jsx";
 
@@ -20,16 +20,16 @@ import {
   Switch,
   Route,
   Link,
-  useParams
+  useParams,
 } from "react-router-dom";
 
-
 const link = createHttpLink({
-  uri: '/graphql',
-  credentials: 'same-origin',
+  uri: "/graphql",
+  credentials: "same-origin",
   headers: {
-    'X-CSRFToken': document.querySelector("input[name=csrfmiddlewaretoken]").value
-  }
+    "X-CSRFToken": document.querySelector("input[name=csrfmiddlewaretoken]")
+      .value,
+  },
 });
 
 const client = new ApolloClient({
@@ -41,9 +41,13 @@ const App = () => (
   <ApolloProvider client={client}>
     <Router>
       <Container>
-        <h2><InlineIcon icon={shipIcon}> </InlineIcon>crusher.beta</h2>
+        <h2>
+          <InlineIcon icon={shipIcon}> </InlineIcon>crusher.beta
+        </h2>
         <Row>
-          <Col md={2}><MainNav></MainNav></Col>
+          <Col md={2}>
+            <MainNav></MainNav>
+          </Col>
           <Col>
             <Switch>
               <Route path="/skus/by-type/:skuType">
@@ -78,7 +82,7 @@ const App = () => (
         </Row>
       </Container>
     </Router>
-  </ApolloProvider >
+  </ApolloProvider>
 );
 
-ReactDOM.render(<App />, document.getElementById('root'));
+ReactDOM.render(<App />, document.getElementById("root"));
