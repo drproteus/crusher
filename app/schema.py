@@ -28,7 +28,18 @@ from app.models import (
     ItemSKU as ItemSKUModel,
     ServiceSKU as ServiceSKUModel,
     TransportationSKU as TransportationSKUModel,
+    Attachment as AttachmentModel,
 )
+
+class Attachment(DjangoObjectType):
+    class Meta:
+        model = AttachmentModel
+
+    metadata = generic.GenericScalar()
+    url = graphene.String()
+
+    def resolve_url(self, info):
+        return self.attached_file.url
 
 
 class Contact(DjangoObjectType):
@@ -38,12 +49,22 @@ class Contact(DjangoObjectType):
     metadata = generic.GenericScalar()
     name = graphene.String()
     fullname = graphene.String()
+    image_url = graphene.String()
+    attachments = graphene.List(Attachment)
 
     def resolve_name(self, info):
         return self.name
 
     def resolve_fullname(self, info):
         return self.fullname
+
+    def resolve_image_url(self, info):
+        if not self.image:
+            return ""
+        return self.image.url
+
+    def resolve_attachments(self, info):
+        return self.attachments.all()
 
 
 class Client(DjangoObjectType):
@@ -660,6 +681,17 @@ class ContactNode(DjangoObjectType):
     uid = graphene.UUID(source="pk")
     metadata = generic.GenericScalar()
 
+    image_url = graphene.String()
+    attachments = graphene.List(Attachment)
+
+    def resolve_image_url(self, info):
+        if not self.image:
+            return ""
+        return self.image.url
+
+    def resolve_attachments(self, info):
+        return self.attachments.all()
+
 
 class ClientNode(DjangoObjectType):
     class Meta:
@@ -671,11 +703,31 @@ class ClientNode(DjangoObjectType):
     metadata = generic.GenericScalar()
 
 
+class AttachmentNode(DjangoObjectType):
+    class Meta:
+        model = AttachmentModel
+        interfaces = (relay.Node,)
+        filter_fields = {
+            "uid": ["exact"]
+        }
+
+    metadata = generic.GenericScalar()
+    url = graphene.String()
+    attached_to = graphene.String()
+
+    def resolve_url(self, info):
+        return self.attached_file.url
+
+    def resolve_attached_to(self, info):
+        return self.content_object.__class__.__name__
+
+
 class Query(graphene.ObjectType):
     invoices = DjangoFilterConnectionField(InvoiceNode)
     skus = DjangoFilterConnectionField(SKUNode)
     clients = DjangoFilterConnectionField(ClientNode)
     contacts = DjangoFilterConnectionField(ContactNode)
+    attachments = DjangoFilterConnectionField(AttachmentNode)
 
     invoice = graphene.Field(Invoice, uid=graphene.ID(required=True))
     sku = graphene.Field(SKU, uid=graphene.ID(required=True))
