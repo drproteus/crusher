@@ -64,13 +64,42 @@ function ClientDetail({ client }) {
   return details;
 }
 
+function ClientInvoiceNodeDetail(invoice) {
+  let data = [];
+  data.push([
+    <span className="bg-info text-white">{invoice.state || "UNKNOWN"}</span>,
+    <Link to={"/invoices/" + invoice.uid}>{invoice.uid}</Link>,
+    <span className="bg-warning">
+      <NumberFormat
+        value={invoice.initialBalance}
+        decimalScale={2}
+        fixedDecimalScale={true}
+        displayType={"text"}
+        prefix={"$"}
+      ></NumberFormat>
+    </span>,
+    <span className="bg-success text-white">
+      <NumberFormat
+        value={invoice.paidBalance}
+        decimalScale={2}
+        fixedDecimalScale={true}
+        displayType={"text"}
+        prefix={"$"}
+      ></NumberFormat>
+    </span>,
+  ]);
+  return data;
+}
+
 function ClientInvoiceList({ client }) {
   let data = [<h5>Invoices</h5>];
   if (client.invoices.edges.length < 1) {
     data.push(<Alert>no invoices found for client</Alert>);
   } else {
-    for (invoice in client.invoices.edges) {
-      data.push(invoice.id);
+    const edges = client.invoices.edges;
+    for (let i = 0; i < edges.length; i++) {
+      let invoiceNode = edges[i].node;
+      data.push(ClientInvoiceNodeDetail(invoiceNode));
     }
   }
   return data;
