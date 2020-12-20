@@ -324,12 +324,12 @@ function SKUs() {
   ];
 }
 
-function SKUThumb({ metadata, width, height }) {
+function SKUThumb({ url, width, height }) {
   width = width || 64;
   height = height || 64;
-  if (metadata && metadata.images && metadata.images.length > 0) {
+  if (url && url.length > 0) {
     return (
-      <Image src={metadata.images[0]} width={width} height={height}></Image>
+      <Image src={url} width={width} height={height}></Image>
     );
   }
   return <Icon width={width} height={height} icon={userIcon}></Icon>;
@@ -379,7 +379,7 @@ function SKURow({ node }) {
     </tr>,
     <tr key={"extra-" + node.uid} className="alert alert-light">
       <td>
-        <SKUThumb metadata={node.metadata}></SKUThumb>
+        <SKUThumb url={node.imageUrl}></SKUThumb>
       </td>
       <td>
         <JSONPretty data={node.metadata}></JSONPretty>

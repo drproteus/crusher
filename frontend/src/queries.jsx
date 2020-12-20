@@ -86,6 +86,7 @@ const SKUS = gql`
           metadata
           defaultPrice
           defaultQuantity
+          imageUrl
         }
       }
     }

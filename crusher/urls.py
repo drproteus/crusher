@@ -44,7 +44,7 @@ urlpatterns = [
         "upload/contact-image/<uuid:contact_uid>",
         app.views.UploadContactImageView.as_view(),
     ),
-    path("upload/sku-image/<uuid:sku_uid>", app.views.UploadContactImageView.as_view()),
+    path("upload/sku-image/<uuid:sku_uid>", app.views.UploadSKUImageView.as_view()),
     re_path(".*", TemplateView.as_view(template_name="app/index.html")),
 ]
 
