@@ -482,6 +482,7 @@ class Query(graphene.ObjectType):
     sku = graphene.Field(SKUNode, uid=graphene.ID(required=True))
     client = graphene.Field(ClientNode, uid=graphene.ID(required=True))
     contact = graphene.Field(ContactNode, uid=graphene.ID(required=True))
+    attachment = graphene.Field(AttachmentNode, uid=graphene.ID(required=True))
 
     def resolve_invoice(root, info, uid):
         return InvoiceModel.objects.get(pk=uid)
@@ -494,6 +495,9 @@ class Query(graphene.ObjectType):
 
     def resolve_contact(root, info, uid):
         return ContactModel.objects.get(pk=uid)
+
+    def resolve_attachment(root, info, uid):
+        return AttachmentModel.objects.get(pk=uid)
 
 
 schema = graphene.Schema(query=Query, mutation=Mutations)

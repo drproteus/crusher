@@ -47,7 +47,7 @@ class AttachmentFilterSet(django_filters.FilterSet):
         return queryset.filter(attached_file__icontains=value)
 
     def filename_extension_filter(self, queryset, name, value):
-        return queryset.filter(attached_file__endswith=value)
+        return queryset.filter(attached_file__endswith=f".{value}")
 
 
 class AttachmentNode(DjangoObjectType):
