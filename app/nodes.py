@@ -28,11 +28,33 @@ from app.models import TransportationSKU as TransportationSKUModel
 from app.models import Vessel as VesselModel
 
 
+class AttachmentFilterSet(django_filters.FilterSet):
+    class Meta:
+        model = AttachmentModel
+        fields = {"uid": ["exact"]}
+
+    filename = django_filters.CharFilter(method="filename_exact_filter")
+    filename_like = django_filters.CharFilter(method="filename_like_filter")
+    extension = django_filters.CharFilter(method="filename_extension_filter")
+
+    def name_filter(self, queryset, name, value):
+        return queryset.filter(name__icontains=value)
+
+    def filename_exact_filter(self, queryset, name, value):
+        return queryset.filter(attached_file=value)
+
+    def filename_like_filter(self, queryset, name, value):
+        return queryset.filter(attached_file__icontains=value)
+
+    def filename_extension_filter(self, queryset, name, value):
+        return queryset.filter(attached_file__endswith=value)
+
+
 class AttachmentNode(DjangoObjectType):
     class Meta:
         model = AttachmentModel
         interfaces = (relay.Node,)
-        filter_fields = {"uid": ["exact"]}
+        filterset_class = AttachmentFilterSet
 
     metadata = generic.GenericScalar()
     url = graphene.String()
