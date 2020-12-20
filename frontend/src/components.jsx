@@ -229,8 +229,8 @@ function MainNav() {
         </Nav.Link>
       </Nav.Item>
       <Nav.Item>
-        <Nav.Link href="/requests">
-          <InlineIcon icon={commentAlt}></InlineIcon> Requests
+        <Nav.Link href="/tasks">
+          <InlineIcon icon={commentAlt}></InlineIcon> Tasks
         </Nav.Link>
       </Nav.Item>
       <Nav.Item>

@@ -23,7 +23,7 @@ from app.models import (
     SKU as SKUModel,
     Client as ClientModel,
     Vessel as VesselModel,
-    Request as RequestModel,
+    Task as TaskModel,
     Job as JobModel,
     ItemSKU as ItemSKUModel,
     ServiceSKU as ServiceSKUModel,
@@ -64,9 +64,9 @@ class Vessel(DjangoObjectType):
         return self.client
 
 
-class Request(DjangoObjectType):
+class Task(DjangoObjectType):
     class Meta:
-        model = RequestModel
+        model = TaskModel
 
     client = graphene.Field(Client)
     metadata = generic.GenericScalar()
@@ -80,7 +80,7 @@ class Job(DjangoObjectType):
         model = JobModel
 
     vessel = graphene.Field(Vessel)
-    origin_request = graphene.Field(Request)
+    origin_task = graphene.Field(Task)
     metadata = generic.GenericScalar()
 
 
@@ -289,7 +289,7 @@ class ModifyVesselMutation(graphene.Mutation):
 
 class JobInput(graphene.InputObjectType):
     vessel_uid = graphene.String()
-    origin_request_uid = graphene.String()
+    origin_task_uid = graphene.String()
     metadata = generic.GenericScalar()
 
 
@@ -522,7 +522,7 @@ METADATA_MODELS = (
     ContactModel,
     VesselModel,
     JobModel,
-    RequestModel,
+    TaskModel,
     SKUModel,
     InvoiceModel,
     LineItemModel,

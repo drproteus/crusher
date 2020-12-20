@@ -12,6 +12,15 @@ from app.metadata import (
 import uuid
 
 
+class Attachment(models.Model):
+    uid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.UUIDField()
+    content_object = GenericForeignKey("content_type", "object_id")
+    attached_file = models.FileField(null=False)
+    metadata = models.JSONField(null=True)
+
+
 class Contact(models.Model):
     uid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     first_name = models.CharField(max_length=256, blank=True, null=True)
@@ -24,6 +33,8 @@ class Contact(models.Model):
     billing_address = models.TextField(blank=True, null=True)
     metadata = models.JSONField(null=True)
     connections = models.ManyToManyField("self")
+    image = models.FileField(null=True)
+    attachments = GenericRelation(Attachment)
 
     @property
     def name(self):
@@ -47,6 +58,8 @@ class Client(models.Model):
     contact = models.ForeignKey(Contact, on_delete=models.SET_NULL, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    image = models.FileField(null=True)
+    attachments = GenericRelation(Attachment)
 
     def __str__(self):
         return f"{self.company}[{self.uid}]"
@@ -67,29 +80,30 @@ class Vessel(models.Model):
     metadata = models.JSONField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    image = models.FileField(null=True)
+    attachments = GenericRelation(Attachment)
 
     def __str__(self):
         return f"{self.name}[{self.uid}]"
 
 
-class Request(models.Model):
-    class RequestState(models.IntegerChoices):
+class Task(models.Model):
+    class TaskState(models.IntegerChoices):
         RECEIVED = 0
         IN_PROGRESS = 1
         REJECTED = -1
         PROCESSED = 2
 
     uid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    state = models.IntegerField(
-        choices=RequestState.choices, default=RequestState.RECEIVED
-    )
+    state = models.IntegerField(choices=TaskState.choices, default=TaskState.RECEIVED)
     client = models.ForeignKey(
-        Client, on_delete=models.CASCADE, null=False, related_name="requests"
+        Client, on_delete=models.CASCADE, null=False, related_name="tasks"
     )
-    contact_mentions = models.ManyToManyField(Contact, related_name="request_mentions")
+    contact_mentions = models.ManyToManyField(Contact, related_name="task_mentions")
     metadata = models.JSONField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    attachments = GenericRelation(Attachment)
 
 
 class Job(models.Model):
@@ -97,10 +111,11 @@ class Job(models.Model):
     vessel = models.ForeignKey(
         Vessel, on_delete=models.SET_NULL, null=True, related_name="jobs"
     )
-    origin_request = models.ForeignKey(Request, on_delete=models.SET_NULL, null=True)
+    origin_task = models.ForeignKey(Task, on_delete=models.SET_NULL, null=True)
     metadata = models.JSONField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    attachments = GenericRelation(Attachment)
 
     def __str__(self):
         return f"Job {self.id} [{self.vessel.name}]"
@@ -168,6 +183,8 @@ class SKU(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    image = models.FileField(null=True)
+    attachments = GenericRelation(Attachment)
     contacts = models.ManyToManyField(Contact, related_name="skus")
     related_skus = models.ManyToManyField("self")
 
@@ -253,6 +270,7 @@ class Invoice(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     metadata = models.JSONField(null=True)
+    attachments = GenericRelation(Attachment)
 
     def get_initial_balance(self):
         return sum(self.line_items.all().values_list("subtotal", flat=True))
