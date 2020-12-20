@@ -276,15 +276,15 @@ function SKUs() {
     <Breadcrumb>
       <SKUBreadcrumbs></SKUBreadcrumbs>
     </Breadcrumb>,
-    <Table borderless>
-      <thead className="alert">
+    <Table borderless className="rounded" style={{ overflow: "hidden" }}>
+      <thead className="bg-primary text-white">
         <tr>
           <th>Name</th>
           <th>Type</th>
-          <th>Default Price</th>
-          <th>Default Quantity</th>
-          <th>Units</th>
-          <th>Actions</th>
+          <th>Price</th>
+          <th>Quantity</th>
+          <th>per</th>
+          <th></th>
         </tr>
       </thead>
       <tbody>
@@ -295,18 +295,28 @@ function SKUs() {
   ];
 }
 
-function SKUThumb({ metadata }) {
+function SKUThumb({ metadata, width, height }) {
+  width = width || 64;
+  height = height || 64;
   if (metadata && metadata.images && metadata.images.length > 0) {
-    return <Image src={metadata.images[0]} width={32} height={32}></Image>;
+    return (
+      <Image src={metadata.images[0]} width={width} height={height}></Image>
+    );
   }
-  return <Icon width={32} height={32} icon={userIcon}></Icon>;
+  return <Icon width={width} height={height} icon={userIcon}></Icon>;
 }
 
 function SKURow({ node }) {
   return [
-    <tr key={node.uid} className="m-3 alert alert-info">
-      <td>{node.name || node.metadata.name || "???"}</td>
-      <td>
+    <tr
+      key={node.uid}
+      className="m-3 bg-dark text-white"
+      style={{ borderRadius: 10 }}
+    >
+      <td className="bg-light text-dark">
+        {node.name || node.metadata.name || "???"}
+      </td>
+      <td className="bg-light text-dark">
         <Link to={"/skus/by-type/" + node.metadata.type}>
           {node.metadata.type}
         </Link>
