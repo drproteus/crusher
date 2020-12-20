@@ -20,9 +20,11 @@ from django.conf.urls.static import static
 from django.views.generic.base import TemplateView
 
 from graphene_django.views import GraphQLView
+import app.views
 
 urlpatterns = [
     path("graphql", GraphQLView.as_view(graphiql=True)),
+    path("upload/invoice-attachment/<uuid:invoice_uid>", app.views.UploadInvoiceAttachmentView.as_view()),
     re_path(".*", TemplateView.as_view(template_name="app/index.html")),
 ]
 

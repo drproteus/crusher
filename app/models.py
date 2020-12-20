@@ -14,6 +14,7 @@ import uuid
 
 class Attachment(models.Model):
     uid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=256)
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.UUIDField()
     content_object = GenericForeignKey("content_type", "object_id")
