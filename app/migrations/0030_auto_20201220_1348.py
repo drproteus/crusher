@@ -6,23 +6,23 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('app', '0029_auto_20201220_1345'),
+        ("app", "0029_auto_20201220_1345"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='client',
-            name='image',
-            field=models.FileField(null=True, upload_to=''),
+            model_name="client",
+            name="image",
+            field=models.FileField(null=True, upload_to=""),
         ),
         migrations.AddField(
-            model_name='sku',
-            name='image',
-            field=models.FileField(null=True, upload_to=''),
+            model_name="sku",
+            name="image",
+            field=models.FileField(null=True, upload_to=""),
         ),
         migrations.AddField(
-            model_name='vessel',
-            name='image',
-            field=models.FileField(null=True, upload_to=''),
+            model_name="vessel",
+            name="image",
+            field=models.FileField(null=True, upload_to=""),
         ),
     ]

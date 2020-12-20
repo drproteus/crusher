@@ -6,14 +6,14 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('app', '0030_auto_20201220_1348'),
+        ("app", "0030_auto_20201220_1348"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='attachment',
-            name='name',
-            field=models.CharField(default='foo', max_length=256),
+            model_name="attachment",
+            name="name",
+            field=models.CharField(default="foo", max_length=256),
             preserve_default=False,
         ),
     ]

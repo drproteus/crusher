@@ -6,48 +6,48 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('app', '0024_auto_20201219_1321'),
+        ("app", "0024_auto_20201219_1321"),
     ]
 
     operations = [
         migrations.RenameField(
-            model_name='client',
-            old_name='id',
-            new_name='uid',
+            model_name="client",
+            old_name="id",
+            new_name="uid",
         ),
         migrations.RenameField(
-            model_name='contact',
-            old_name='id',
-            new_name='uid',
+            model_name="contact",
+            old_name="id",
+            new_name="uid",
         ),
         migrations.RenameField(
-            model_name='credit',
-            old_name='id',
-            new_name='uid',
+            model_name="credit",
+            old_name="id",
+            new_name="uid",
         ),
         migrations.RenameField(
-            model_name='invoice',
-            old_name='id',
-            new_name='uid',
+            model_name="invoice",
+            old_name="id",
+            new_name="uid",
         ),
         migrations.RenameField(
-            model_name='job',
-            old_name='id',
-            new_name='uid',
+            model_name="job",
+            old_name="id",
+            new_name="uid",
         ),
         migrations.RenameField(
-            model_name='lineitem',
-            old_name='id',
-            new_name='uid',
+            model_name="lineitem",
+            old_name="id",
+            new_name="uid",
         ),
         migrations.RenameField(
-            model_name='request',
-            old_name='id',
-            new_name='uid',
+            model_name="request",
+            old_name="id",
+            new_name="uid",
         ),
         migrations.RenameField(
-            model_name='vessel',
-            old_name='id',
-            new_name='uid',
+            model_name="vessel",
+            old_name="id",
+            new_name="uid",
         ),
     ]
