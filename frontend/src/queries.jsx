@@ -8,11 +8,13 @@ const CLIENTS = gql`
           uid
           company
           metadata
+          imageUrl
           contact {
             uid
             name
             primaryEmail
           }
+          invoiceCounts
           invoices {
             edges {
               node {
@@ -20,8 +22,12 @@ const CLIENTS = gql`
                 paidBalance
                 initialBalance
                 lineItems {
-                  uid
-                  subtotal
+                  edges {
+                    node {
+                      uid
+                      subtotal
+                    }
+                  }
                 }
               }
             }
@@ -57,6 +63,7 @@ const CONTACTS = gql`
           lastName
           mailingAddress
           billingAddress
+          imageUrl
         }
       }
     }

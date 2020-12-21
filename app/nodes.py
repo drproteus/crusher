@@ -169,6 +169,23 @@ class ClientNode(DjangoObjectType):
     uid = graphene.UUID(source="pk")
     metadata = generic.GenericScalar()
     attachments = DjangoFilterConnectionField(AttachmentNode)
+    image_url = graphene.String()
+    invoice_counts = generic.GenericScalar()
+
+    def resolve_image_url(self, info):
+        if self.image:
+            return self.image.url
+        return ""
+
+    def resolve_invoice_counts(self, info):
+        return {
+            "open": self.invoices.filter(state=1).count(),
+            "paid_partial": self.invoices.filter(state=2).count(),
+            "paid_full": self.invoices.filter(state=3).count(),
+            "drafts": self.invoices.filter(state=0).count(),
+            "closed": self.invoices.filter(state=4).count(),
+            "void": self.invoices.filter(state=-1).count(),
+        }
 
 
 class VesselNode(DjangoObjectType):
@@ -179,6 +196,12 @@ class VesselNode(DjangoObjectType):
 
     metadata = generic.GenericScalar()
     attachments = DjangoFilterConnectionField(AttachmentNode)
+    image_url = graphene.String()
+
+    def resolve_image_url(self, info):
+        if self.image:
+            return self.image.url
+        return ""
 
 
 class TaskNode(DjangoObjectType):
