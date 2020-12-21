@@ -36,14 +36,7 @@ import JSONPretty from "react-json-pretty";
 import NumberFormat from "react-number-format";
 
 import { SKUS, CONTACTS, CLIENTS } from "./queries.jsx";
-
-// <NumberFormat
-//   value={invoice.initialBalance}
-//   decimalScale={2}
-//   fixedDecimalScale={true}
-//   displayType={"text"}
-//   prefix={"$"}
-// ></NumberFormat>
+import { CREATE_CLIENT, UPDATE_CLIENT, UPDATE_METADATA } from "./mutations.jsx"
 
 function ClientBreadcrumbs() {
   let params = useParams();
@@ -150,7 +143,6 @@ function Contacts() {
     </div>
   ));
 }
-
 
 function GraphQLLoading() {
   return [
