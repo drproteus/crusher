@@ -34,7 +34,7 @@ import searchIcon from "@iconify-icons/uil/search";
 
 import JSONPretty from "react-json-pretty";
 import NumberFormat from "react-number-format";
-import Moment from "react-moment"
+import Moment from "react-moment";
 
 import { SKUS, CONTACTS, CLIENTS } from "./queries.jsx";
 
@@ -118,13 +118,26 @@ function Clients() {
 
 function ClientDetail({ client }) {
   return (
-    <div>
+    <div className="m-t-3">
       <Media>
         <ClientImage client={client} width={200} height={200}></ClientImage>
         <Media.Body className="p-3">
-          <h5>{client.company}</h5>
-          <p className="text-muted">{client.uid}</p>
-          <p>created at: <Moment>{client.createdAt}</Moment></p>
+          <Row>
+            <Col md={8}>
+              <h5>{client.company}</h5>
+              <p className="text-muted">{client.uid}</p>
+              <p>
+                created at: <Moment>{client.createdAt}</Moment>
+              </p>
+            </Col>
+            <Col className="text-right">
+              <ButtonGroup vertical>
+                <Button variant="info">Edit</Button>
+                <Button variant="warning">Run Export</Button>
+                <Button variant="danger">Delete</Button>
+              </ButtonGroup>
+            </Col>
+          </Row>
           <JSONPretty data={client.metadata}></JSONPretty>
         </Media.Body>
       </Media>
@@ -132,9 +145,15 @@ function ClientDetail({ client }) {
         <ListGroup.Item>
           <Row>
             <Col md={6}>
+              <Button size="sm" className="float-right">
+                Open Invoice
+              </Button>
               <h6>Invoices</h6>
             </Col>
             <Col md={6}>
+              <Button size="sm" className="float-right">
+                Add Contact
+              </Button>
               <h6>Contact(s)</h6>
             </Col>
           </Row>
@@ -142,13 +161,37 @@ function ClientDetail({ client }) {
         <ListGroup.Item>
           <Row>
             <Col>
-              <h6>Attachments</h6>
+              <Button size="sm" className="float-right">
+                Add Task
+              </Button>
+              <h6>
+                Tasks
+              </h6>
             </Col>
-            <div className="text-right">
-              <Button size="sm" className="">
+            <Col>
+              <Button size="sm" className="float-right">
+                Add Job
+              </Button>
+              <h6>Jobs</h6>
+            </Col>
+          </Row>
+        </ListGroup.Item>
+        <ListGroup.Item>
+          <Row>
+            <Col>
+              <Button size="sm" className="float-right">
+                Create Vessel
+              </Button>
+              <h6>
+                Vessels
+              </h6>
+            </Col>
+            <Col>
+              <Button size="sm" className="float-right">
                 Upload Attachment
               </Button>
-            </div>
+              <h6>Attachments</h6>
+            </Col>
           </Row>
         </ListGroup.Item>
       </ListGroup>
