@@ -23,7 +23,8 @@ function CreateClient() {
         createClient({ variables: values });
       }}
     >
-      <Form>
+      <Form className="p-3">
+        <h3>New Client</h3>
         <div className="form-group">
           <label htmlFor="company"></label>
           <Field

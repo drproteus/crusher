@@ -11,25 +11,59 @@ const CLIENTS = gql`
           company
           metadata
           imageUrl
-          contact {
-            uid
-            name
-            primaryEmail
-          }
           invoiceCounts
-          invoices {
-            edges {
-              node {
-                uid
-                paidBalance
-                initialBalance
-                lineItems {
-                  edges {
-                    node {
-                      uid
-                      subtotal
-                    }
-                  }
+        }
+      }
+    }
+  }
+`;
+
+const CLIENT_DETAIL = gql`
+  query($uid: UUID!, $invoiceState: String) {
+    client(uid: $uid) {
+      uid
+      createdAt
+      updatedAt
+      company
+      metadata
+      imageUrl
+      invoiceCounts
+      contact {
+        uid
+        name
+        primaryEmail
+      }
+      attachments {
+        edges {
+          node {
+            uid
+            url
+            name
+            createdAt
+          }
+        }
+      }
+      invoices(state: $invoiceState) {
+        edges {
+          node {
+            uid
+            paidBalance
+            initialBalance
+            attachments {
+              edges {
+                node {
+                  uid
+                  url
+                  name
+                  createdAt
+                }
+              }
+            }
+            lineItems {
+              edges {
+                node {
+                  uid
+                  subtotal
                 }
               }
             }
@@ -102,4 +136,4 @@ const SKUS = gql`
   }
 `;
 
-export { CLIENTS, CONTACTS, SKUS };
+export { CLIENT_DETAIL, CLIENTS, CONTACTS, SKUS };

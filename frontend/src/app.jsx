@@ -13,7 +13,14 @@ import priceTagAlt from "@iconify-icons/uil/pricetag-alt";
 import { ApolloProvider } from "@apollo/react-hooks";
 import { ApolloClient, createHttpLink, InMemoryCache } from "@apollo/client";
 
-import { SKUs, Clients, Contacts, Home, MainNav } from "./components.jsx";
+import {
+  SKUs,
+  Clients,
+  Client,
+  Contacts,
+  Home,
+  MainNav,
+} from "./components.jsx";
 
 import {
   BrowserRouter as Router,
@@ -73,7 +80,7 @@ const App = () => (
                 <CreateClient />
               </Route>
               <Route path="/clients/:uid">
-                <Clients />
+                <Client />
               </Route>
               <Route path="/clients">
                 <Clients />

@@ -7,11 +7,7 @@ const CREATE_CLIENT = gql`
     $metadata: GenericScalar
   ) {
     modifyClient(
-      data: {
-        company: $company
-        contactUid: $contactUid
-        metadata: $metadata
-      }
+      data: { company: $company, contactUid: $contactUid, metadata: $metadata }
     ) {
       client {
         uid
@@ -35,11 +31,7 @@ const UPDATE_CLIENT = gql`
   ) {
     modifyClient(
       uid: $uid
-      data: {
-        company: $company
-        contactUid: $contactUid
-        metadata: $metadata
-      }
+      data: { company: $company, contactUid: $contactUid, metadata: $metadata }
     ) {
       client {
         uid
@@ -55,12 +47,12 @@ const UPDATE_CLIENT = gql`
 `;
 
 const DELETE_CLIENT = gql`
-mutation DeleteClient($uid: UUID!) {
-  deleteClient(uid: $uid) {
-    ok
+  mutation DeleteClient($uid: UUID!) {
+    deleteClient(uid: $uid) {
+      ok
+    }
   }
-}
-`
+`;
 
 const UPDATE_METADATA = gql`
   mutation UpdateMetadata(
@@ -76,6 +68,5 @@ const UPDATE_METADATA = gql`
     }
   }
 `;
-
 
 export { CREATE_CLIENT, UPDATE_CLIENT, UPDATE_METADATA, DELETE_CLIENT };

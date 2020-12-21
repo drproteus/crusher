@@ -36,7 +36,7 @@ import JSONPretty from "react-json-pretty";
 import NumberFormat from "react-number-format";
 import Moment from "react-moment";
 
-import { SKUS, CONTACTS, CLIENTS } from "./queries.jsx";
+import { SKUS, CONTACTS, CLIENTS, CLIENT_DETAIL } from "./queries.jsx";
 import { DELETE_CLIENT } from "./mutations.jsx";
 
 function ClientBreadcrumbs() {
@@ -48,6 +48,15 @@ function ClientBreadcrumbs() {
   return crumbs.map((c) => <Breadcrumb.Item>{c}</Breadcrumb.Item>);
 }
 
+function Client() {
+  const { loading, error, data } = useQuery(CLIENT_DETAIL, {
+    variables: useParams(),
+  });
+  if (loading) return <GraphQLLoading></GraphQLLoading>;
+  if (error) return <p>Error :(</p>;
+  return <ClientDetail client={data.client}></ClientDetail>;
+}
+
 function ClientsAsList() {
   const { loading, error, data } = useQuery(CLIENTS, {
     variables: useParams(),
@@ -55,7 +64,6 @@ function ClientsAsList() {
 
   if (loading) return <GraphQLLoading></GraphQLLoading>;
   if (error) return <p>Error :(</p>;
-  const showDetail = useParams().uid !== undefined;
   return data.clients.edges.map(({ node }) => (
     <ListGroup.Item className="bg-light">
       <ClientImage client={node} width={32} height={32}>
@@ -64,40 +72,41 @@ function ClientsAsList() {
       <Link to={"/clients/" + node.uid} className="m-3">
         {node.company}
       </Link>
-      <div className="float-right">
-        <span className="text-muted">invoices: </span>
-        <Badge className="m-1" variant="secondary">
-          {node.invoiceCounts.drafts} drafts
-        </Badge>
-        <Badge className="m-1" variant="primary">
-          {node.invoiceCounts.open} open
-        </Badge>
-        <Badge className="m-1" variant="warning">
-          {node.invoiceCounts.paid_partial} paid partial
-        </Badge>
-        <Badge className="m-1" variant="success">
-          {node.invoiceCounts.paid_partial} paid full
-        </Badge>
-        <Badge className="m-1" variant="dark">
-          {node.invoiceCounts.void} void
-        </Badge>
-        <Badge className="m-1" variant="danger">
-          {node.invoiceCounts.closed} closed
-        </Badge>
-      </div>
-      {showDetail && <ClientDetail client={node}></ClientDetail>}
+      <InvoiceBadges className="float-right" client={node}></InvoiceBadges>
     </ListGroup.Item>
   ));
+}
+
+function InvoiceBadges({ client, className }) {
+  return (
+    <div className={className}>
+      {/* <span className="text-muted">invoices: </span> */}
+      <Badge className="m-1" variant="secondary">
+        {client.invoiceCounts.drafts} drafts
+      </Badge>
+      <Badge className="m-1" variant="primary">
+        {client.invoiceCounts.open} open
+      </Badge>
+      <Badge className="m-1" variant="warning">
+        {client.invoiceCounts.paid_partial} paid partial
+      </Badge>
+      <Badge className="m-1" variant="success">
+        {client.invoiceCounts.paid_partial} paid full
+      </Badge>
+      <Badge className="m-1" variant="dark">
+        {client.invoiceCounts.void} void
+      </Badge>
+      <Badge className="m-1" variant="danger">
+        {client.invoiceCounts.closed} closed
+      </Badge>
+    </div>
+  );
 }
 
 function Clients() {
   return [
     <Row>
-      <Col md={8}>
-        <Breadcrumb>
-          <ClientBreadcrumbs></ClientBreadcrumbs>
-        </Breadcrumb>
-      </Col>
+      <Col md={8}></Col>
       <Col>
         <div className="text-right m-1">
           <ButtonGroup>
@@ -141,6 +150,7 @@ function ClientDetail({ client }) {
               <p>
                 created at: <Moment>{client.createdAt}</Moment>
               </p>
+              <InvoiceBadges client={client}></InvoiceBadges>
             </Col>
             <Col className="text-right">
               <ButtonGroup vertical>
@@ -259,8 +269,6 @@ function SKURows() {
 function Home() {
   return <div className="jumbotron">crusher.beta</div>;
 }
-
-export { Clients, Contacts, SKUs, Home, MainNav };
 
 function MainNav() {
   return (
@@ -425,3 +433,5 @@ function SKURow({ node }) {
     </tr>,
   ];
 }
+
+export { Client, Clients, Contacts, SKUs, Home, MainNav };
