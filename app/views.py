@@ -14,9 +14,20 @@ class FilenameConflictException(Exception):
     pass
 
 
+@method_decorator(csrf_exempt, name="dispatch")
+class AttachmentView(View):
+    def delete(self, request, attachment_uid, **kwargs):
+        try:
+            a = Attchment.objects.get(uid=attachment_uid)
+        except Attachment.DoesNotExist:
+            raise Http404
+        a.delete()
+        return HttpResponse(status=200)
+
+
 # DO NOT LEAVE THIS HERE --> FOR TESTING ONLY
 @method_decorator(csrf_exempt, name="dispatch")
-class UploadInvoiceAttachmentView(View):
+class InvoiceAttachmentView(View):
     @classmethod
     def check_for_conflicts(cls, name):
         if not default_storage.exists(name):
@@ -50,7 +61,7 @@ class UploadInvoiceAttachmentView(View):
 
 
 @method_decorator(csrf_exempt, name="dispatch")
-class UploadClientAttachmentView(View):
+class ClientAttachmentView(View):
     @classmethod
     def check_for_conflicts(cls, name):
         if not default_storage.exists(name):
@@ -84,7 +95,7 @@ class UploadClientAttachmentView(View):
 
 
 @method_decorator(csrf_exempt, name="dispatch")
-class UploadContactAttachmentView(View):
+class ContactAttachmentView(View):
     @classmethod
     def check_for_conflicts(cls, name):
         if not default_storage.exists(name):
@@ -118,7 +129,16 @@ class UploadContactAttachmentView(View):
 
 
 @method_decorator(csrf_exempt, name="dispatch")
-class UploadContactImageView(View):
+class ContactImageView(View):
+    def delete(self, request, contact_uid, **kwargs):
+        try:
+            contact = Contact.objects.get(pk=contact_uid)
+        except Contact.DoesNotExist:
+            raise Http404
+        contact.image = None
+        contact.save()
+        return HttpResponse(status=200)
+
     def post(self, request, contact_uid, **kwargs):
         try:
             contact = Contact.objects.get(pk=contact_uid)
@@ -136,7 +156,16 @@ class UploadContactImageView(View):
 
 
 @method_decorator(csrf_exempt, name="dispatch")
-class UploadClientImageView(View):
+class ClientImageView(View):
+    def delete(self, request, client_uid, **kwargs):
+        try:
+            client = Client.objects.get(pk=client_uid)
+        except Client.DoesNotExist:
+            raise Http404
+        client.image = None
+        client.save()
+        return HttpResponse(status=200)
+
     def post(self, request, client_uid, **kwargs):
         try:
             client = Client.objects.get(pk=client_uid)
@@ -154,7 +183,16 @@ class UploadClientImageView(View):
 
 
 @method_decorator(csrf_exempt, name="dispatch")
-class UploadSKUImageView(View):
+class SKUImageView(View):
+    def delete(self, request, sku_uid, **kwargs):
+        try:
+            sku = SKU.objects.get(pk=sku_uid)
+        except SKU.DoesNotExist:
+            raise Http404
+        sku.image = None
+        sku.save()
+        return HttpResponse(status=200)
+
     def post(self, request, sku_uid, **kwargs):
         try:
             sku = SKU.objects.get(pk=sku_uid)

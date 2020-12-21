@@ -26,25 +26,22 @@ urlpatterns = [
     path("graphql", GraphQLView.as_view(graphiql=True)),
     path(
         "upload/invoice-attachment/<uuid:invoice_uid>",
-        app.views.UploadInvoiceAttachmentView.as_view(),
+        app.views.InvoiceAttachmentView.as_view(),
     ),
     path(
         "upload/contact-attachment/<uuid:contact_uid>",
-        app.views.UploadContactAttachmentView.as_view(),
+        app.views.ContactAttachmentView.as_view(),
     ),
     path(
         "upload/client-attachment/<uuid:client_uid>",
-        app.views.UploadClientAttachmentView.as_view(),
+        app.views.ClientAttachmentView.as_view(),
     ),
+    path("upload/client-image/<uuid:client_uid>", app.views.ClientImageView.as_view(),),
     path(
-        "upload/client-image/<uuid:client_uid>",
-        app.views.UploadClientImageView.as_view(),
+        "upload/contact-image/<uuid:contact_uid>", app.views.ContactImageView.as_view(),
     ),
-    path(
-        "upload/contact-image/<uuid:contact_uid>",
-        app.views.UploadContactImageView.as_view(),
-    ),
-    path("upload/sku-image/<uuid:sku_uid>", app.views.UploadSKUImageView.as_view()),
+    path("upload/sku-image/<uuid:sku_uid>", app.views.SKUImageView.as_view()),
+    path("upload/attachment/<uuid:attachment_uid>", app.views.AttachmentView.as_view()),
     re_path(".*", TemplateView.as_view(template_name="app/index.html")),
 ]
 
