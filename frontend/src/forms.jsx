@@ -17,10 +17,11 @@ function CreateClient() {
         metadata: "{}",
       }}
       onSubmit={(values) => {
-        if (values.metadata !== undefined) {
-          values.metadata = JSON.parse(values.metadata);
+        let vars = { ...values };
+        if (vars.metadata !== undefined) {
+          vars.metadata = JSON.parse(vars.metadata);
         }
-        createClient({ variables: values });
+        createClient({ variables: vars });
       }}
     >
       <Form className="p-3">
