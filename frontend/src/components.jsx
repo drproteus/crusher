@@ -124,7 +124,10 @@ function ClientDetail({ client }) {
     },
   });
   function deleteThisClient() {
-    deleteClient({ variables: { uid: client.uid } });
+    let confirmation = confirm(
+      `Are you sure you wish to delete ${client.company}? This will delete most associated records (except invoices)`
+    );
+    if (confirmation) deleteClient({ variables: { uid: client.uid } });
   }
   return (
     <div className="m-t-3">
