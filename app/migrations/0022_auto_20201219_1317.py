@@ -11,14 +11,8 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RemoveField(
-            model_name="credit",
-            name="client",
-        ),
-        migrations.RemoveField(
-            model_name="credit",
-            name="line_item",
-        ),
+        migrations.RemoveField(model_name="credit", name="client",),
+        migrations.RemoveField(model_name="credit", name="line_item",),
         migrations.AddField(
             model_name="credit",
             name="contact",
@@ -30,8 +24,6 @@ class Migration(migrations.Migration):
             ),
         ),
         migrations.AddField(
-            model_name="credit",
-            name="metadata",
-            field=models.JSONField(null=True),
+            model_name="credit", name="metadata", field=models.JSONField(null=True),
         ),
     ]

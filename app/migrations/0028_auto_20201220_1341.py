@@ -80,13 +80,8 @@ class Migration(migrations.Migration):
                 ),
             ],
         ),
-        migrations.RemoveField(
-            model_name="job",
-            name="origin_request",
-        ),
-        migrations.DeleteModel(
-            name="Request",
-        ),
+        migrations.RemoveField(model_name="job", name="origin_request",),
+        migrations.DeleteModel(name="Request",),
         migrations.AddField(
             model_name="job",
             name="origin_task",

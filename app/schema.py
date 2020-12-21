@@ -55,11 +55,7 @@ class ModifyContactMutation(graphene.Mutation):
 
     @classmethod
     def mutate(
-        cls,
-        root,
-        info,
-        data,
-        uid=None,
+        cls, root, info, data, uid=None,
     ):
         try:
             contact = ContactModel.objects.get(pk=uid)
@@ -122,11 +118,7 @@ class ModifyClientMutation(graphene.Mutation):
 
     @classmethod
     def mutate(
-        cls,
-        root,
-        info,
-        data,
-        uid=None,
+        cls, root, info, data, uid=None,
     ):
         try:
             client = ClientModel.objects.get(pk=uid)
@@ -155,11 +147,7 @@ class ModifyVesselMutation(graphene.Mutation):
 
     @classmethod
     def mutate(
-        cls,
-        root,
-        info,
-        data,
-        uid=None,
+        cls, root, info, data, uid=None,
     ):
         try:
             vessel = VesselModel.objects.get(pk=uid)

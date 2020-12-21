@@ -13,35 +13,20 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name="ItemSKU",
             fields=[],
-            options={
-                "proxy": True,
-                "indexes": [],
-                "constraints": [],
-            },
+            options={"proxy": True, "indexes": [], "constraints": [],},
             bases=("app.sku",),
         ),
         migrations.CreateModel(
             name="ServiceSKU",
             fields=[],
-            options={
-                "proxy": True,
-                "indexes": [],
-                "constraints": [],
-            },
+            options={"proxy": True, "indexes": [], "constraints": [],},
             bases=("app.sku",),
         ),
         migrations.CreateModel(
             name="TransportationSKU",
             fields=[],
-            options={
-                "proxy": True,
-                "indexes": [],
-                "constraints": [],
-            },
+            options={"proxy": True, "indexes": [], "constraints": [],},
             bases=("app.sku",),
         ),
-        migrations.AlterModelManagers(
-            name="sku",
-            managers=[],
-        ),
+        migrations.AlterModelManagers(name="sku", managers=[],),
     ]

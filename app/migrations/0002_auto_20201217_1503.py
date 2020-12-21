@@ -10,9 +10,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RenameField(
-            model_name="sku",
-            old_name="data",
-            new_name="metadata",
-        ),
+        migrations.RenameField(model_name="sku", old_name="data", new_name="metadata",),
     ]

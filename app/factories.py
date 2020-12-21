@@ -45,11 +45,7 @@ class ItemFactory(factory.django.DjangoModelFactory):
         model = "app.SKU"
 
     metadata = factory.LazyAttribute(
-        lambda o: {
-            "type": "item",
-            "name": fake.word(),
-            "upc": fake.upc_e(),
-        }
+        lambda o: {"type": "item", "name": fake.word(), "upc": fake.upc_e(),}
     )
     units = "unit"
 

@@ -14,27 +14,12 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AlterModelManagers(
-            name="sku",
-            managers=[
-                ("services", django.db.models.manager.Manager()),
-            ],
+            name="sku", managers=[("services", django.db.models.manager.Manager()),],
         ),
-        migrations.RemoveField(
-            model_name="client",
-            name="billing_address",
-        ),
-        migrations.RemoveField(
-            model_name="client",
-            name="email",
-        ),
-        migrations.RemoveField(
-            model_name="client",
-            name="mailing_address",
-        ),
-        migrations.RemoveField(
-            model_name="client",
-            name="mobile",
-        ),
+        migrations.RemoveField(model_name="client", name="billing_address",),
+        migrations.RemoveField(model_name="client", name="email",),
+        migrations.RemoveField(model_name="client", name="mailing_address",),
+        migrations.RemoveField(model_name="client", name="mobile",),
         migrations.CreateModel(
             name="Contact",
             fields=[

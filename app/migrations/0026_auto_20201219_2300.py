@@ -10,9 +10,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RenameField(
-            model_name="sku",
-            old_name="id",
-            new_name="uid",
-        ),
+        migrations.RenameField(model_name="sku", old_name="id", new_name="uid",),
     ]

@@ -11,8 +11,6 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AlterField(
-            model_name="invoice",
-            name="metadata",
-            field=models.JSONField(null=True),
+            model_name="invoice", name="metadata", field=models.JSONField(null=True),
         ),
     ]

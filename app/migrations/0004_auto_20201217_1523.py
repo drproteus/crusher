@@ -11,10 +11,7 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RemoveField(
-            model_name="invoice",
-            name="client",
-        ),
+        migrations.RemoveField(model_name="invoice", name="client",),
         migrations.AddField(
             model_name="invoice",
             name="job",

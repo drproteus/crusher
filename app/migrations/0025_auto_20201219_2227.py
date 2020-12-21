@@ -10,44 +10,12 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RenameField(
-            model_name="client",
-            old_name="id",
-            new_name="uid",
-        ),
-        migrations.RenameField(
-            model_name="contact",
-            old_name="id",
-            new_name="uid",
-        ),
-        migrations.RenameField(
-            model_name="credit",
-            old_name="id",
-            new_name="uid",
-        ),
-        migrations.RenameField(
-            model_name="invoice",
-            old_name="id",
-            new_name="uid",
-        ),
-        migrations.RenameField(
-            model_name="job",
-            old_name="id",
-            new_name="uid",
-        ),
-        migrations.RenameField(
-            model_name="lineitem",
-            old_name="id",
-            new_name="uid",
-        ),
-        migrations.RenameField(
-            model_name="request",
-            old_name="id",
-            new_name="uid",
-        ),
-        migrations.RenameField(
-            model_name="vessel",
-            old_name="id",
-            new_name="uid",
-        ),
+        migrations.RenameField(model_name="client", old_name="id", new_name="uid",),
+        migrations.RenameField(model_name="contact", old_name="id", new_name="uid",),
+        migrations.RenameField(model_name="credit", old_name="id", new_name="uid",),
+        migrations.RenameField(model_name="invoice", old_name="id", new_name="uid",),
+        migrations.RenameField(model_name="job", old_name="id", new_name="uid",),
+        migrations.RenameField(model_name="lineitem", old_name="id", new_name="uid",),
+        migrations.RenameField(model_name="request", old_name="id", new_name="uid",),
+        migrations.RenameField(model_name="vessel", old_name="id", new_name="uid",),
     ]

@@ -11,8 +11,6 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.RenameField(
-            model_name="attachment",
-            old_name="object_uid",
-            new_name="object_id",
+            model_name="attachment", old_name="object_uid", new_name="object_id",
         ),
     ]
