@@ -54,6 +54,14 @@ const UPDATE_CLIENT = gql`
   }
 `;
 
+const DELETE_CLIENT = gql`
+mutation DeleteClient($uid: UUID!) {
+  deleteClient(uid: $uid) {
+    ok
+  }
+}
+`
+
 const UPDATE_METADATA = gql`
   mutation UpdateMetadata(
     $uid: UUID!
@@ -70,4 +78,4 @@ const UPDATE_METADATA = gql`
 `;
 
 
-export { CREATE_CLIENT, UPDATE_CLIENT, UPDATE_METADATA };
+export { CREATE_CLIENT, UPDATE_CLIENT, UPDATE_METADATA, DELETE_CLIENT };

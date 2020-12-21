@@ -55,7 +55,11 @@ class ModifyContactMutation(graphene.Mutation):
 
     @classmethod
     def mutate(
-        cls, root, info, data, uid=None,
+        cls,
+        root,
+        info,
+        data,
+        uid=None,
     ):
         try:
             contact = ContactModel.objects.get(pk=uid)
@@ -109,6 +113,19 @@ class DeleteClientContact(graphene.Mutation):
         return DeleteClientContact(client=client)
 
 
+class DeleteClientMutation(graphene.Mutation):
+    class Arguments:
+        uid = graphene.UUID()
+
+    ok = graphene.Boolean()
+
+    @classmethod
+    def mutate(cls, root, info, uid):
+        client = ClientModel.objects.get(pk=uid)
+        client.delete()
+        return DeleteClientMutation(ok=True)
+
+
 class ModifyClientMutation(graphene.Mutation):
     class Arguments:
         data = ClientInput(required=True)
@@ -118,7 +135,11 @@ class ModifyClientMutation(graphene.Mutation):
 
     @classmethod
     def mutate(
-        cls, root, info, data, uid=None,
+        cls,
+        root,
+        info,
+        data,
+        uid=None,
     ):
         try:
             client = ClientModel.objects.get(pk=uid)
@@ -147,7 +168,11 @@ class ModifyVesselMutation(graphene.Mutation):
 
     @classmethod
     def mutate(
-        cls, root, info, data, uid=None,
+        cls,
+        root,
+        info,
+        data,
+        uid=None,
     ):
         try:
             vessel = VesselModel.objects.get(pk=uid)
@@ -444,6 +469,7 @@ class Mutations(graphene.ObjectType):
     modify_sku_relation = ModifySKURelationMutation.Field()
     modify_sku_contact_relation = ModifySKUContactRelationMutation.Field()
     modify_client = ModifyClientMutation.Field()
+    delete_client = DeleteClientMutation.Field()
     modify_vessel = ModifyVesselMutation.Field()
     modify_job = ModifyJobMutation.Field()
     modify_sku = ModifySKUMutation.Field()

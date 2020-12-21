@@ -1,6 +1,6 @@
 import React from "react";
 import { useParams, Link } from "react-router-dom";
-import { useQuery } from "@apollo/react-hooks";
+import { useMutation, useQuery } from "@apollo/react-hooks";
 import Nav from "react-bootstrap/Nav";
 import Table from "react-bootstrap/Table";
 import Button from "react-bootstrap/Button";
@@ -37,6 +37,7 @@ import NumberFormat from "react-number-format";
 import Moment from "react-moment";
 
 import { SKUS, CONTACTS, CLIENTS } from "./queries.jsx";
+import { DELETE_CLIENT } from "./mutations.jsx";
 
 function ClientBreadcrumbs() {
   let params = useParams();
@@ -117,6 +118,14 @@ function Clients() {
 }
 
 function ClientDetail({ client }) {
+  const [deleteClient] = useMutation(DELETE_CLIENT, {
+    onCompleted: () => {
+      window.location.replace("/clients"); // hacky redirect..
+    },
+  });
+  function deleteThisClient() {
+    deleteClient({ variables: { uid: client.uid } });
+  }
   return (
     <div className="m-t-3">
       <Media>
@@ -134,7 +143,9 @@ function ClientDetail({ client }) {
               <ButtonGroup vertical>
                 <Button variant="info">Edit</Button>
                 <Button variant="warning">Run Export</Button>
-                <Button variant="danger">Delete</Button>
+                <Button variant="danger" onClick={deleteThisClient}>
+                  Delete
+                </Button>
               </ButtonGroup>
             </Col>
           </Row>
@@ -164,9 +175,7 @@ function ClientDetail({ client }) {
               <Button size="sm" className="float-right">
                 Add Task
               </Button>
-              <h6>
-                Tasks
-              </h6>
+              <h6>Tasks</h6>
             </Col>
             <Col>
               <Button size="sm" className="float-right">
@@ -182,9 +191,7 @@ function ClientDetail({ client }) {
               <Button size="sm" className="float-right">
                 Create Vessel
               </Button>
-              <h6>
-                Vessels
-              </h6>
+              <h6>Vessels</h6>
             </Col>
             <Col>
               <Button size="sm" className="float-right">
