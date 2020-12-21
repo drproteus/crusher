@@ -34,6 +34,7 @@ import searchIcon from "@iconify-icons/uil/search";
 
 import JSONPretty from "react-json-pretty";
 import NumberFormat from "react-number-format";
+import Moment from "react-moment"
 
 import { SKUS, CONTACTS, CLIENTS } from "./queries.jsx";
 
@@ -53,6 +54,7 @@ function ClientsAsList() {
 
   if (loading) return <GraphQLLoading></GraphQLLoading>;
   if (error) return <p>Error :(</p>;
+  const showDetail = useParams().uid !== undefined;
   return data.clients.edges.map(({ node }) => (
     <ListGroup.Item className="bg-light">
       <ClientImage client={node} width={32} height={32}>
@@ -82,6 +84,7 @@ function ClientsAsList() {
           {node.invoiceCounts.closed} closed
         </Badge>
       </div>
+      {showDetail && <ClientDetail client={node}></ClientDetail>}
     </ListGroup.Item>
   ));
 }
@@ -111,6 +114,46 @@ function Clients() {
       <ClientsAsList></ClientsAsList>
     </ListGroup>,
   ];
+}
+
+function ClientDetail({ client }) {
+  return (
+    <div>
+      <Media>
+        <ClientImage client={client} width={200} height={200}></ClientImage>
+        <Media.Body className="p-3">
+          <h5>{client.company}</h5>
+          <p className="text-muted">{client.uid}</p>
+          <p>created at: <Moment>{client.createdAt}</Moment></p>
+          <JSONPretty data={client.metadata}></JSONPretty>
+        </Media.Body>
+      </Media>
+      <ListGroup className="m-3">
+        <ListGroup.Item>
+          <Row>
+            <Col md={6}>
+              <h6>Invoices</h6>
+            </Col>
+            <Col md={6}>
+              <h6>Contact(s)</h6>
+            </Col>
+          </Row>
+        </ListGroup.Item>
+        <ListGroup.Item>
+          <Row>
+            <Col>
+              <h6>Attachments</h6>
+            </Col>
+            <div className="text-right">
+              <Button size="sm" className="">
+                Upload Attachment
+              </Button>
+            </div>
+          </Row>
+        </ListGroup.Item>
+      </ListGroup>
+    </div>
+  );
 }
 
 function ClientImage({ client, width, height }) {

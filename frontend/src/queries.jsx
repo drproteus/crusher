@@ -6,6 +6,8 @@ const CLIENTS = gql`
       edges {
         node {
           uid
+          createdAt
+          updatedAt
           company
           metadata
           imageUrl
