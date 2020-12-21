@@ -40,11 +40,10 @@ class InvoiceAttachmentView(View):
         except Invoice.DoesNotExist:
             raise Http404
         file_obj = request.FILES.get("attachment_file")
-        name = request.POST.get(
-            "filename",
-            f"Invoice Attachment [{datetime.now().isoformat()}] {file_obj.name}",
+        name = request.POST.get("filename", file_obj.name)
+        file_obj.name = (
+            f"attachments/invoice/{invoice_uid}/{datetime.now().isoformat()}/{file_obj.name}",
         )
-        file_obj.name = name
         metadata = {}
         for k, v in request.POST.items():
             if k != "filename":
@@ -74,11 +73,10 @@ class ClientAttachmentView(View):
         except Client.DoesNotExist:
             raise Http404
         file_obj = request.FILES.get("attachment_file")
-        name = request.POST.get(
-            "filename",
-            f"Client Attachment [{datetime.now().isoformat()}] {file_obj.name}",
+        name = request.POST.get("filename", file_obj.name)
+        file_obj.name = (
+            f"attachments/client/{client_uid}/{datetime.now().isoformat()}/{file_obj.name}",
         )
-        file_obj.name = name
         metadata = {}
         for k, v in request.POST.items():
             if k != "filename":
@@ -108,11 +106,10 @@ class ContactAttachmentView(View):
         except Contact.DoesNotExist:
             raise Http404
         file_obj = request.FILES.get("attachment_file")
-        name = request.POST.get(
-            "filename",
-            f"Contact Attachment [{datetime.now().isoformat()}] {file_obj.name}",
+        name = request.POST.get("filename", file_obj.name)
+        file_obj.name = (
+            f"attachments/contact/{contact_uid}/{datetime.now().isoformat()}/{file_obj.name}",
         )
-        file_obj.name = name
         metadata = {}
         for k, v in request.POST.items():
             if k != "filename":
@@ -149,6 +146,10 @@ class ContactImageView(View):
             return HttpResponse(status=420)
         file_obj.name = f"contact-image-{contact_uid}"
 
+        name = request.POST.get("filename", file_obj.name)
+        file_obj.name = (
+            f"attachments/contact/{contact_uid}/{datetime.now().isoformat()}/{file_obj.name}",
+        )
         contact.image = file_obj
         contact.save()
 
@@ -174,7 +175,7 @@ class ClientImageView(View):
         file_obj = request.FILES.get("image")
         if not file_obj:
             return HttpResponse(status=420)
-        file_obj.name = f"client-image-{client_uid}"
+        file_obj.name = f"images/client/{client_uid}/{file_obj.name}"
 
         client.image = file_obj
         client.save()
@@ -201,7 +202,7 @@ class SKUImageView(View):
         file_obj = request.FILES.get("image")
         if not file_obj:
             return HttpResponse(status=420)
-        file_obj.name = f"sku-image-{sku_uid}"
+        file_obj.name = f"images/sku/{sku_uid}/{file_obj.name}"
 
         sku.image = file_obj
         sku.save()
