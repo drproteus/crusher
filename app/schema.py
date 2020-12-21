@@ -49,7 +49,7 @@ class ContactInput(graphene.InputObjectType):
 class ModifyContactMutation(graphene.Mutation):
     class Arguments:
         data = ContactInput(required=True)
-        uid = graphene.ID()
+        uid = graphene.UUID()
 
     contact = graphene.Field(ContactNode)
 
@@ -70,8 +70,8 @@ class ModifyContactMutation(graphene.Mutation):
 
 class ModifyClientConnectionMutation(graphene.Mutation):
     class Arguments:
-        c1_uid = graphene.ID(required=True)
-        c2_uid = graphene.ID(required=True)
+        c1_uid = graphene.UUID(required=True)
+        c2_uid = graphene.UUID(required=True)
         action = graphene.String()
 
     ok = graphene.Boolean()
@@ -91,13 +91,13 @@ class ModifyClientConnectionMutation(graphene.Mutation):
 
 class ClientInput(graphene.InputObjectType):
     company = graphene.String()
-    contact_uid = graphene.ID()
+    contact_uid = graphene.UUID()
     metadata = generic.GenericScalar()
 
 
 class DeleteClientContact(graphene.Mutation):
     class Arguments:
-        uid = graphene.ID(required=True)
+        uid = graphene.UUID(required=True)
 
     client = graphene.Field(ClientNode)
 
@@ -112,7 +112,7 @@ class DeleteClientContact(graphene.Mutation):
 class ModifyClientMutation(graphene.Mutation):
     class Arguments:
         data = ClientInput(required=True)
-        uid = graphene.ID()
+        uid = graphene.UUID()
 
     client = graphene.Field(ClientNode)
 
@@ -141,7 +141,7 @@ class VesselInput(graphene.InputObjectType):
 class ModifyVesselMutation(graphene.Mutation):
     class Arguments:
         data = VesselInput(required=True)
-        uid = graphene.ID()
+        uid = graphene.UUID()
 
     vessel = graphene.Field(VesselNode)
 
@@ -161,15 +161,15 @@ class ModifyVesselMutation(graphene.Mutation):
 
 
 class JobInput(graphene.InputObjectType):
-    vessel_uid = graphene.String()
-    origin_task_uid = graphene.String()
+    vessel_uid = graphene.UUID()
+    origin_task_uid = graphene.UUID()
     metadata = generic.GenericScalar()
 
 
 class ModifyJobMutation(graphene.Mutation):
     class Arguments:
         data = JobInput(required=True)
-        uid = graphene.ID()
+        uid = graphene.UUID()
 
     job = graphene.Field(JobNode)
 
@@ -243,7 +243,7 @@ class SKUInput(graphene.InputObjectType):
 class ModifySKUMutation(graphene.Mutation):
     class Arguments:
         data = SKUInput(required=True)
-        uid = graphene.ID()
+        uid = graphene.UUID()
 
     sku = graphene.Field(SKUNode)
 
@@ -279,7 +279,7 @@ class BeginInvoiceMutation(graphene.Mutation):
 
 class SetInvoiceStateMutation(graphene.Mutation):
     class Arguments:
-        uid = graphene.ID(required=True)
+        uid = graphene.UUID(required=True)
         state = graphene.Int(required=True)
 
     invoice = graphene.Field(InvoiceNode)
@@ -294,7 +294,7 @@ class SetInvoiceStateMutation(graphene.Mutation):
 
 class SetInvoiceMetadataMutation(graphene.Mutation):
     class Arguments:
-        uid = graphene.ID(required=True)
+        uid = graphene.UUID(required=True)
         metadata = generic.GenericScalar(required=True)
 
     invoice = graphene.Field(InvoiceNode)
@@ -309,7 +309,7 @@ class SetInvoiceMetadataMutation(graphene.Mutation):
 
 class AddLineItemMutation(graphene.Mutation):
     class Arguments:
-        invoice_uid = graphene.ID(required=True)
+        invoice_uid = graphene.UUID(required=True)
         sku_uid = graphene.String(required=True)
         price = graphene.Float()
         quantity = graphene.Float()
@@ -332,7 +332,7 @@ class AddLineItemMutation(graphene.Mutation):
 
 class DeleteLineItemMutation(graphene.Mutation):
     class Arguments:
-        uid = graphene.ID(required=True)
+        uid = graphene.UUID(required=True)
 
     invoice = graphene.Field(InvoiceNode)
 
@@ -348,7 +348,7 @@ class DeleteLineItemMutation(graphene.Mutation):
 
 class ApplyCreditMutation(graphene.Mutation):
     class Arguments:
-        invoice_uid = graphene.ID(required=True)
+        invoice_uid = graphene.UUID(required=True)
         amount = graphene.Float(required=True)
         memo = graphene.String()
         metadata = generic.GenericScalar()
@@ -366,7 +366,7 @@ class ApplyCreditMutation(graphene.Mutation):
 
 class DeleteCreditMutation(graphene.Mutation):
     class Arguments:
-        credit_uid = graphene.ID(required=True)
+        credit_uid = graphene.UUID(required=True)
 
     invoice = graphene.Field(InvoiceNode)
 
@@ -381,7 +381,7 @@ class DeleteCreditMutation(graphene.Mutation):
 
 class GenerateInvoicePreviewMutation(graphene.Mutation):
     class Arguments:
-        uid = graphene.ID()
+        uid = graphene.UUID()
 
     url = graphene.String()
 
@@ -406,7 +406,7 @@ METADATA_MODELS = (
 
 class ModifyMetadataMutation(graphene.Mutation):
     class Arguments:
-        uid = graphene.ID(required=True)
+        uid = graphene.UUID(required=True)
         metadata = generic.GenericScalar(required=True)
         mode = graphene.String()
 
@@ -468,11 +468,11 @@ class Query(graphene.ObjectType):
     contacts = DjangoFilterConnectionField(ContactNode)
     attachments = DjangoFilterConnectionField(AttachmentNode)
 
-    invoice = graphene.Field(InvoiceNode, uid=graphene.ID(required=True))
-    sku = graphene.Field(SKUNode, uid=graphene.ID(required=True))
-    client = graphene.Field(ClientNode, uid=graphene.ID(required=True))
-    contact = graphene.Field(ContactNode, uid=graphene.ID(required=True))
-    attachment = graphene.Field(AttachmentNode, uid=graphene.ID(required=True))
+    invoice = graphene.Field(InvoiceNode, uid=graphene.UUID(required=True))
+    sku = graphene.Field(SKUNode, uid=graphene.UUID(required=True))
+    client = graphene.Field(ClientNode, uid=graphene.UUID(required=True))
+    contact = graphene.Field(ContactNode, uid=graphene.UUID(required=True))
+    attachment = graphene.Field(AttachmentNode, uid=graphene.UUID(required=True))
 
     def resolve_invoice(root, info, uid):
         return InvoiceModel.objects.get(pk=uid)

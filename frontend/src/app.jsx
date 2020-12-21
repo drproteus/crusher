@@ -22,6 +22,7 @@ import {
   Link,
   useParams,
 } from "react-router-dom";
+import { CreateClient } from "./forms.jsx";
 
 const link = createHttpLink({
   uri: "/graphql",
@@ -67,6 +68,9 @@ const App = () => (
               </Route>
               <Route path="/contacts">
                 <Contacts />
+              </Route>
+              <Route path="/clients/new">
+                <CreateClient />
               </Route>
               <Route path="/clients/:uid">
                 <Clients />

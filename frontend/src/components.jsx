@@ -36,7 +36,6 @@ import JSONPretty from "react-json-pretty";
 import NumberFormat from "react-number-format";
 
 import { SKUS, CONTACTS, CLIENTS } from "./queries.jsx";
-import { CREATE_CLIENT, UPDATE_CLIENT, UPDATE_METADATA } from "./mutations.jsx"
 
 function ClientBreadcrumbs() {
   let params = useParams();
@@ -101,9 +100,9 @@ function Clients() {
             <Button variant="info">
               <InlineIcon icon={searchIcon}></InlineIcon> Find Client
             </Button>
-            <Button>
+            <Link to="/clients/new" className="btn btn-primary">
               <InlineIcon icon={plusIcon}></InlineIcon> Add Client
-            </Button>
+            </Link>
           </ButtonGroup>
         </div>
       </Col>

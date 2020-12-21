@@ -7,9 +7,11 @@ const CREATE_CLIENT = gql`
     $metadata: GenericScalar
   ) {
     modifyClient(
-      company: $company
-      contactUid: $contactUid
-      metadata: $metadata
+      data: {
+        company: $company
+        contactUid: $contactUid
+        metadata: $metadata
+      }
     ) {
       client {
         uid
@@ -33,9 +35,11 @@ const UPDATE_CLIENT = gql`
   ) {
     modifyClient(
       uid: $uid
-      company: $company
-      contactUid: $contactUid
-      metadata: $metadata
+      data: {
+        company: $company
+        contactUid: $contactUid
+        metadata: $metadata
+      }
     ) {
       client {
         uid
