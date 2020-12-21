@@ -12,6 +12,8 @@ import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import Spinner from "react-bootstrap/Spinner";
 import Breadcrumb from "react-bootstrap/Breadcrumb";
+import ListGroup from "react-bootstrap/ListGroup";
+import Badge from "react-bootstrap/Badge";
 
 import { Icon, InlineIcon } from "@iconify/react";
 import shipIcon from "@iconify-icons/uil/ship";
@@ -27,99 +29,21 @@ import ambulanceIcon from "@iconify-icons/uil/ambulance";
 import editIcon from "@iconify-icons/uil/edit";
 import timesCircle from "@iconify-icons/uil/times-circle";
 import folderOpen from "@iconify-icons/uil/folder-open";
+import plusIcon from "@iconify-icons/uil/plus";
+import searchIcon from "@iconify-icons/uil/search";
 
 import JSONPretty from "react-json-pretty";
 import NumberFormat from "react-number-format";
 
 import { SKUS, CONTACTS, CLIENTS } from "./queries.jsx";
 
-function ClientAboutBrief({ client }) {
-  if (client.metadata && client.metadata.about) {
-    return <p>{client.metadata.about}</p>;
-  }
-  return null;
-}
-
-function ClientDetail({ client }) {
-  let details = [
-    <Media>
-      <ClientImage client={client} width={200} height={200}></ClientImage>
-      <Media.Body style={{ marginLeft: 10 }}>
-        <h4>{client.company}</h4>
-        <p className="text-muted">
-          <Link to={"/clients/" + client.uid}>{client.uid}</Link>
-        </p>
-        <ClientAboutBrief client={client}></ClientAboutBrief>
-      </Media.Body>
-    </Media>,
-    <Row>
-      <Col md={6} className="p-3">
-        <ClientInvoiceList client={client}></ClientInvoiceList>
-      </Col>
-      <Col md={6} className="p-3">
-        <ClientContactShort client={client}></ClientContactShort>
-      </Col>
-    </Row>,
-  ];
-  return details;
-}
-
-function ClientInvoiceNodeDetail(invoice) {
-  let data = [];
-  data.push([
-    <span className="bg-info text-white">{invoice.state || "UNKNOWN"}</span>,
-    <Link to={"/invoices/" + invoice.uid}>{invoice.uid}</Link>,
-    <span className="bg-warning">
-      <NumberFormat
-        value={invoice.initialBalance}
-        decimalScale={2}
-        fixedDecimalScale={true}
-        displayType={"text"}
-        prefix={"$"}
-      ></NumberFormat>
-    </span>,
-    <span className="bg-success text-white">
-      <NumberFormat
-        value={invoice.paidBalance}
-        decimalScale={2}
-        fixedDecimalScale={true}
-        displayType={"text"}
-        prefix={"$"}
-      ></NumberFormat>
-    </span>,
-  ]);
-  return data;
-}
-
-function ClientInvoiceList({ client }) {
-  let data = [<h5>Invoices</h5>];
-  if (client.invoices.edges.length < 1) {
-    data.push(<Alert>no invoices found for client</Alert>);
-  } else {
-    const edges = client.invoices.edges;
-    for (let i = 0; i < edges.length; i++) {
-      let invoiceNode = edges[i].node;
-      data.push(ClientInvoiceNodeDetail(invoiceNode));
-    }
-  }
-  return data;
-}
-
-function ClientContactShort({ client }) {
-  if (!client.contact) {
-    return [];
-  }
-  return [
-    <Alert variant="info">
-      <h5>Contact</h5>
-      <p>{client.contact.primaryEmail}</p>
-      <p>{client.contact.name}</p>
-      <Link to={"/contacts/" + client.contact.uid}>
-        <Button>View</Button>
-      </Link>
-    </Alert>,
-  ];
-}
+// <NumberFormat
+//   value={invoice.initialBalance}
+//   decimalScale={2}
+//   fixedDecimalScale={true}
+//   displayType={"text"}
+//   prefix={"$"}
+// ></NumberFormat>
 
 function ClientBreadcrumbs() {
   let params = useParams();
@@ -130,31 +54,82 @@ function ClientBreadcrumbs() {
   return crumbs.map((c) => <Breadcrumb.Item>{c}</Breadcrumb.Item>);
 }
 
-function Clients() {
+function ClientsAsList() {
   const { loading, error, data } = useQuery(CLIENTS, {
     variables: useParams(),
   });
 
   if (loading) return <GraphQLLoading></GraphQLLoading>;
   if (error) return <p>Error :(</p>;
-
-  return [
-    <Breadcrumb>
-      <ClientBreadcrumbs></ClientBreadcrumbs>
-    </Breadcrumb>,
-    data.clients.edges.map(({ node }) => (
-      <div key={node.uid}>
-        <ClientDetail client={node}></ClientDetail>
+  return data.clients.edges.map(({ node }) => (
+    <ListGroup.Item className="bg-light">
+      <ClientImage client={node} width={32} height={32}>
+        {" "}
+      </ClientImage>
+      <Link to={"/clients/" + node.uid} className="m-3">
+        {node.company}
+      </Link>
+      <div className="float-right">
+        <span className="text-muted">invoices: </span>
+        <Badge className="m-1" variant="secondary">
+          {node.invoiceCounts.drafts} drafts
+        </Badge>
+        <Badge className="m-1" variant="primary">
+          {node.invoiceCounts.open} open
+        </Badge>
+        <Badge className="m-1" variant="warning">
+          {node.invoiceCounts.paid_partial} paid partial
+        </Badge>
+        <Badge className="m-1" variant="success">
+          {node.invoiceCounts.paid_partial} paid full
+        </Badge>
+        <Badge className="m-1" variant="dark">
+          {node.invoiceCounts.void} void
+        </Badge>
+        <Badge className="m-1" variant="danger">
+          {node.invoiceCounts.closed} closed
+        </Badge>
       </div>
-    )),
+    </ListGroup.Item>
+  ));
+}
+
+function Clients() {
+  return [
+    <Row>
+      <Col md={8}>
+        <Breadcrumb>
+          <ClientBreadcrumbs></ClientBreadcrumbs>
+        </Breadcrumb>
+      </Col>
+      <Col>
+        <div className="text-right m-1">
+          <ButtonGroup>
+            <Button variant="info">
+              <InlineIcon icon={searchIcon}></InlineIcon> Find Client
+            </Button>
+            <Button>
+              <InlineIcon icon={plusIcon}></InlineIcon> Add Client
+            </Button>
+          </ButtonGroup>
+        </div>
+      </Col>
+    </Row>,
+    <ListGroup variant="flush">
+      <ClientsAsList></ClientsAsList>
+    </ListGroup>,
   ];
 }
 
 function ClientImage({ client, width, height }) {
-  let placeholder =
-    client.metadata.profile_image_url || "http://placekitten.com/200/200";
+  let placeholder = client.imageUrl || "http://placekitten.com/200/200";
   return (
-    <Image width={width} height={height} src={placeholder} thumbnail></Image>
+    <Image
+      width={width}
+      height={height}
+      src={placeholder}
+      roundedCircle
+    ></Image>
   );
 }
 
@@ -176,31 +151,6 @@ function Contacts() {
   ));
 }
 
-function Metadata({ inner }) {
-  let data = [];
-  for (var k in inner) {
-    if (inner.hasOwnProperty(k)) {
-      data.push(
-        <tr>
-          <th>
-            <pre>{k}</pre>
-          </th>
-          <td>
-            <pre>{JSON.stringify(inner[k])}</pre>
-          </td>
-        </tr>
-      );
-    }
-  }
-  if (data.length < 1) {
-    return [];
-  }
-  return [
-    <Table size="sm" borderless>
-      <tbody>{data}</tbody>
-    </Table>,
-  ];
-}
 
 function GraphQLLoading() {
   return [
@@ -223,7 +173,7 @@ function Home() {
   return <div className="jumbotron">crusher.beta</div>;
 }
 
-export { Clients, Contacts, Metadata, SKUs, Home, MainNav };
+export { Clients, Contacts, SKUs, Home, MainNav };
 
 function MainNav() {
   return (
@@ -328,9 +278,7 @@ function SKUThumb({ url, width, height }) {
   width = width || 64;
   height = height || 64;
   if (url && url.length > 0) {
-    return (
-      <Image src={url} width={width} height={height}></Image>
-    );
+    return <Image src={url} width={width} height={height}></Image>;
   }
   return <Icon width={width} height={height} icon={userIcon}></Icon>;
 }
@@ -339,13 +287,11 @@ function SKURow({ node }) {
   return [
     <tr
       key={node.uid}
-      className="m-3 bg-dark text-white"
+      className="m-3 bg-light text-dark"
       style={{ borderRadius: 10 }}
     >
-      <td className="bg-light text-dark">
-        {node.name || node.metadata.name || "???"}
-      </td>
-      <td className="bg-light text-dark">
+      <td>{node.name || node.metadata.name || "???"}</td>
+      <td>
         <Link to={"/skus/by-type/" + node.metadata.type}>
           {node.metadata.type}
         </Link>
@@ -377,7 +323,7 @@ function SKURow({ node }) {
         </ButtonGroup>
       </td>
     </tr>,
-    <tr key={"extra-" + node.uid} className="alert alert-light">
+    <tr key={"extra-" + node.uid}>
       <td>
         <SKUThumb url={node.imageUrl}></SKUThumb>
       </td>
@@ -385,7 +331,9 @@ function SKURow({ node }) {
         <JSONPretty data={node.metadata}></JSONPretty>
       </td>
       <td colSpan="4" align="right">
-        <Link to={`/skus/${node.uid}`}>{node.uid}</Link>
+        <Link to={`/skus/${node.uid}`} className="text-muted">
+          {node.uid}
+        </Link>
       </td>
     </tr>,
   ];
