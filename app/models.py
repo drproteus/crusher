@@ -20,6 +20,8 @@ class Attachment(models.Model):
     content_object = GenericForeignKey("content_type", "object_id")
     attached_file = models.FileField(null=False)
     metadata = models.JSONField(null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
 
 class Contact(models.Model):
