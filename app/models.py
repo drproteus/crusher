@@ -415,14 +415,34 @@ class FormTemplate(models.Model):
         return self.annotations
 
     def render_with_data(self, data):
+        template = self.fill_template_with_annotation_fields(data)
         canvas_data = self.get_overlay_canvas(data)
-        form = self.merge(canvas_data, self.template_file)
+        form = self.merge(canvas_data, template)
         return self.write_form(form, data)
+
+    def fill_template_with_annotation_fields(self, data):
+        template = pdfrw.PdfReader(self.template_file)
+        for field_name, value in data.items():
+            if field_name in self.annotations_by_name:
+                idx = self.annotations_by_name["annot_idx"]
+                annot = template.pages[0].Annots[idx]
+                if not annot:
+                    continue
+                if isinstance(value, bool) and value:
+                    annot.update(pdfrw.PdfDict(AS=pdfrw.PdfName("Yes")))
+                else:
+                    annot.update(pdfrw.PdfDict(V="{}".format(value)))
+                annot.update(pdfrw.PdfDict(AP=""))
+        template.seek(0)
+        return template
 
     def get_overlay_canvas(self, field_data):
         data = io.BytesIO()
         pdf = canvas.Canvas(data)
-        for field_name, (x, y) in self.fields.items():
+        for field_name, field in self.fields.items():
+            if field["type"] != "point":
+                continue
+            x, y = field["coords"]
             pdf.drawString(x=x, y=y, text=field_data.get(field_name, ""))
         pdf.save()
         data.seek(0)
