@@ -455,11 +455,18 @@ class FormTemplate(models.Model):
         data = io.BytesIO()
         pdf = canvas.Canvas(data)
         fields = self.fields or {}
+        pdf.setFontSize(size=10)
         for field_name, field in fields.items():
-            if field["type"] != "point":
-                continue
-            x, y = field["coords"]
-            pdf.drawString(x=x, y=y, text=field_data.get(field_name, ""))
+            if field["type"] == "text":
+                x, y = field["coords"]
+                font_size = field.get("size", None)
+                pdf.setFontSize(size=font_size)
+                pdf.drawString(x=x, y=y, text=field_data.get(field_name, ""))
+                pdf.setFontSize(size=10)
+            elif field["type"] == "select":
+                x, y = field["coords"]
+                radius = field.get("radius", 2)
+                pdf.circle(x, y, radius, fill=1)
         pdf.save()
         data.seek(0)
         return data
