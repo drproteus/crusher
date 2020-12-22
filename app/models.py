@@ -15,6 +15,7 @@ import uuid
 import io
 import pdfrw
 from reportlab.pdfgen import canvas
+from django.core.files.base import ContentFile
 
 ###
 
@@ -353,6 +354,7 @@ class FormTemplate(models.Model):
             ...
         }
     """
+
     uid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=256)
     fields = models.JSONField(null=True)
@@ -365,7 +367,7 @@ class FormTemplate(models.Model):
     def render_with_data(self, data):
         canvas_data = self.get_overlay_canvas(data)
         form = self.merge(canvas_data, self.template_file)
-        return self.write_form(form)
+        return self.write_form(form, data)
 
     def get_overlay_canvas(self, field_data):
         data = io.BytesIO()
@@ -388,11 +390,12 @@ class FormTemplate(models.Model):
         return form
 
     def write_form(self, form_obj, data):
-        pdf_uuid = uuid()
+        pdf_uuid = uuid.uuid4()
         form_filename = f"rendered_forms/{self.name}/{pdf_uuid}.pdf"
         form_obj.name = form_filename
+        rendered = ContentFile(form_obj.getvalue(), form_obj.name)
         rendered = RenderedForm.objects.create(
-            template=self, rendered_data=data, rendered_file=form_obj
+            template=self, rendering_data=data, rendered_file=rendered
         )
         return rendered
 
