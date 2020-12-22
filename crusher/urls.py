@@ -42,6 +42,8 @@ urlpatterns = [
     ),
     path("upload/sku-image/<uuid:sku_uid>", app.views.SKUImageView.as_view()),
     path("upload/attachment/<uuid:attachment_uid>", app.views.AttachmentView.as_view()),
+    path("upload/form-template", app.views.FormTemplateView.as_view()),
+    path("upload/form-template/<uuid:template_uid>", app.views.FormTemplateView.as_view()),
     re_path(".*", TemplateView.as_view(template_name="app/index.html")),
 ]
 

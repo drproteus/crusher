@@ -7,7 +7,15 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import View
 
-from app.models import Attachment, Invoice, Client, Contact, SKU
+from app.models import (
+    Attachment,
+    Invoice,
+    Client,
+    Contact,
+    SKU,
+    FormTemplate,
+    RenderedForm,
+)
 
 
 class FilenameConflictException(Exception):
@@ -208,3 +216,22 @@ class SKUImageView(View):
         sku.save()
 
         return HttpResponse(status=200)
+
+
+# DO NOT LEAVE THIS HERE --> FOR TESTING ONLY
+@method_decorator(csrf_exempt, name="dispatch")
+class FormTemplateView(View):
+    def post(self, request, template_uid=None, **kwargs):
+        file_obj = request.FILES.get("template_file")
+        if not file_obj:
+            return HttpResponse(status=420)
+        name = request.POST.get("name", file_obj.name)
+        try:
+            template = FormTemplate.objects.get(pk=template_uid)
+            template.template_file = file_obj
+            template.name = template.name or request.POST.get("name", "")
+            template.save()
+        except FormTemplate.DoesNotExist:
+            template = FormTemplate.objects.create(name=name, template_file=file_obj)
+
+        return HttpResponse(template.template_file.url, status=200)
