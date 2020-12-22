@@ -26,6 +26,8 @@ from app.models import ServiceSKU as ServiceSKUModel
 from app.models import Task as TaskModel
 from app.models import TransportationSKU as TransportationSKUModel
 from app.models import Vessel as VesselModel
+from app.models import FormTemplate as FormTemplateModel
+from app.models import RenderedForm as RenderedFormModel
 
 
 class AttachmentFilterSet(django_filters.FilterSet):
@@ -246,3 +248,35 @@ class CreditNode(DjangoObjectType):
             "invoice": ["exact"],
             "amount": ["exact", "lt", "lte", "gt", "gte"],
         }
+
+
+class FormTemplateNode(DjangoObjectType):
+    class Meta:
+        model = FormTemplateModel
+        interfaces = (relay.Node,)
+        filter_fields = {"uid": ["exact"], "name": ["exact", "icontains"]}
+
+    fields = generic.GenericScalar()
+    metadata = generic.GenericScalar()
+    url = graphene.String()
+
+    def resolve_url(self, info):
+        if not self.template_file:
+            return ""
+        return self.template_file.url
+
+
+class RenderedFormNode(DjangoObjectType):
+    class Meta:
+        model = RenderedFormModel
+        interfaces = (relay.Node,)
+        filter_fields = {"uid": ["exact"]}
+
+    metadata = generic.GenericScalar()
+    rendering_data = generic.GenericScalar()
+    url = graphene.String()
+
+    def resolve_url(self, info):
+        if not self.rendered_file:
+            return ""
+        return self.rendered_file.url

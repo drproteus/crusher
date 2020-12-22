@@ -29,9 +29,36 @@ from app.models import (
     ServiceSKU as ServiceSKUModel,
     TransportationSKU as TransportationSKUModel,
     Attachment as AttachmentModel,
+    FormTemplate as FormTemplateModel,
+    RenderedForm as RenderedFormModel,
 )
 
 from app.nodes import *
+
+
+
+class ModifyFormTemplateMutation(graphene.Mutation):
+    class Arguments:
+        uid = graphene.UUID()
+        name = graphene.String(required=False)
+        fields = generic.GenericScalar()
+        update_fields = graphene.Boolean()
+
+    form_template = graphene.Field(FormTemplateNode)
+
+    @classmethod
+    def mutate(cls, root, info, uid, name=None, fields=None, update_fields=False):
+        template = FormTemplateModel.objects.get(pk=uid)
+        if name:
+            template.name = name
+        if fields:
+            original = template.fields
+            if update_fields:
+                original.update(fields)
+                template.fields = original
+            else:
+                template.fields = fields
+        return ModifyFormTemplateMutation(form_template=template)
 
 
 class ContactInput(graphene.InputObjectType):
@@ -486,6 +513,9 @@ class Mutations(graphene.ObjectType):
     apply_credit = ApplyCreditMutation.Field()
     delete_credit = DeleteCreditMutation.Field()
 
+    modify_form_template = ModifyFormTemplateMutation.Field()
+
+
 
 class Query(graphene.ObjectType):
     invoices = DjangoFilterConnectionField(InvoiceNode)
@@ -493,6 +523,8 @@ class Query(graphene.ObjectType):
     clients = DjangoFilterConnectionField(ClientNode)
     contacts = DjangoFilterConnectionField(ContactNode)
     attachments = DjangoFilterConnectionField(AttachmentNode)
+    form_templates = DjangoFilterConnectionField(FormTemplateNode)
+    rendered_forms = DjangoFilterConnectionField(RenderedFormNode)
 
     invoice = graphene.Field(InvoiceNode, uid=graphene.UUID(required=True))
     sku = graphene.Field(SKUNode, uid=graphene.UUID(required=True))
