@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('app', '0004_auto_20201222_0135'),
+        ("app", "0004_auto_20201222_0135"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='renderedform',
-            name='rendering_data',
+            model_name="renderedform",
+            name="rendering_data",
             field=models.JSONField(null=True),
         ),
     ]

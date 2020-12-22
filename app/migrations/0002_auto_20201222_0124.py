@@ -6,23 +6,23 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('app', '0001_squashed_0032_auto_20201221_1758'),
+        ("app", "0001_squashed_0032_auto_20201221_1758"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='attachment',
-            name='created_at',
+            model_name="attachment",
+            name="created_at",
             field=models.DateTimeField(auto_now_add=True),
         ),
         migrations.AlterField(
-            model_name='attachment',
-            name='name',
+            model_name="attachment",
+            name="name",
             field=models.CharField(max_length=256),
         ),
         migrations.AlterField(
-            model_name='lineitem',
-            name='service_date',
+            model_name="lineitem",
+            name="service_date",
             field=models.DateTimeField(auto_now_add=True),
         ),
     ]

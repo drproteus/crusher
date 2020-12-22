@@ -236,5 +236,5 @@ class FormTemplateView(View):
         try:
             template.write_parsed_annotations()
         except Exception:
-            print("Failed to parse annotations...") # !!!
+            print("Failed to parse annotations...")  # !!!
         return HttpResponse(template.template_file.url, status=200)

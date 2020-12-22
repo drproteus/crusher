@@ -36,7 +36,6 @@ from app.models import (
 from app.nodes import *
 
 
-
 class ModifyFormTemplateMutation(graphene.Mutation):
     class Arguments:
         uid = graphene.UUID()
@@ -514,7 +513,6 @@ class Mutations(graphene.ObjectType):
     delete_credit = DeleteCreditMutation.Field()
 
     modify_form_template = ModifyFormTemplateMutation.Field()
-
 
 
 class Query(graphene.ObjectType):

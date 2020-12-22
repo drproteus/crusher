@@ -12,258 +12,534 @@ import uuid
 
 class Migration(migrations.Migration):
 
-    replaces = [('app', '0001_initial'), ('app', '0002_auto_20201217_1503'), ('app', '0003_auto_20201217_1522'), ('app', '0004_auto_20201217_1523'), ('app', '0005_auto_20201217_1556'), ('app', '0006_auto_20201217_1847'), ('app', '0007_auto_20201217_1855'), ('app', '0008_auto_20201217_1857'), ('app', '0009_tag'), ('app', '0010_auto_20201217_2135'), ('app', '0011_auto_20201217_2135'), ('app', '0012_auto_20201217_2318'), ('app', '0013_delete_tag'), ('app', '0014_auto_20201218_0040'), ('app', '0015_auto_20201218_1354'), ('app', '0016_auto_20201218_1443'), ('app', '0017_auto_20201218_1449'), ('app', '0018_auto_20201218_1619'), ('app', '0019_auto_20201218_1750'), ('app', '0020_auto_20201219_1312'), ('app', '0021_auto_20201219_1314'), ('app', '0022_auto_20201219_1317'), ('app', '0023_auto_20201219_1319'), ('app', '0024_auto_20201219_1321'), ('app', '0025_auto_20201219_2227'), ('app', '0026_auto_20201219_2300'), ('app', '0027_contact_image'), ('app', '0028_auto_20201220_1341'), ('app', '0029_auto_20201220_1345'), ('app', '0030_auto_20201220_1348'), ('app', '0031_attachment_name'), ('app', '0032_auto_20201221_1758')]
+    replaces = [
+        ("app", "0001_initial"),
+        ("app", "0002_auto_20201217_1503"),
+        ("app", "0003_auto_20201217_1522"),
+        ("app", "0004_auto_20201217_1523"),
+        ("app", "0005_auto_20201217_1556"),
+        ("app", "0006_auto_20201217_1847"),
+        ("app", "0007_auto_20201217_1855"),
+        ("app", "0008_auto_20201217_1857"),
+        ("app", "0009_tag"),
+        ("app", "0010_auto_20201217_2135"),
+        ("app", "0011_auto_20201217_2135"),
+        ("app", "0012_auto_20201217_2318"),
+        ("app", "0013_delete_tag"),
+        ("app", "0014_auto_20201218_0040"),
+        ("app", "0015_auto_20201218_1354"),
+        ("app", "0016_auto_20201218_1443"),
+        ("app", "0017_auto_20201218_1449"),
+        ("app", "0018_auto_20201218_1619"),
+        ("app", "0019_auto_20201218_1750"),
+        ("app", "0020_auto_20201219_1312"),
+        ("app", "0021_auto_20201219_1314"),
+        ("app", "0022_auto_20201219_1317"),
+        ("app", "0023_auto_20201219_1319"),
+        ("app", "0024_auto_20201219_1321"),
+        ("app", "0025_auto_20201219_2227"),
+        ("app", "0026_auto_20201219_2300"),
+        ("app", "0027_contact_image"),
+        ("app", "0028_auto_20201220_1341"),
+        ("app", "0029_auto_20201220_1345"),
+        ("app", "0030_auto_20201220_1348"),
+        ("app", "0031_attachment_name"),
+        ("app", "0032_auto_20201221_1758"),
+    ]
 
     initial = True
 
     dependencies = [
-        ('contenttypes', '0002_remove_content_type_name'),
+        ("contenttypes", "0002_remove_content_type_name"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Client',
+            name="Client",
             fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('company', models.CharField(max_length=256)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('metadata', models.JSONField(null=True)),
+                (
+                    "id",
+                    models.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
+                ),
+                ("company", models.CharField(max_length=256)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                ("metadata", models.JSONField(null=True)),
             ],
         ),
         migrations.CreateModel(
-            name='Invoice',
+            name="Invoice",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('state', models.IntegerField(choices=[(0, 'Draft'), (1, 'Open'), (2, 'Paid Partial'), (3, 'Paid Full'), (4, 'Closed'), (-1, 'Void')], default=0)),
-                ('initial_balance', models.DecimalField(decimal_places=2, default=0, max_digits=32)),
-                ('paid_balance', models.DecimalField(decimal_places=2, default=0, max_digits=32)),
-                ('due_date', models.DateTimeField(null=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "state",
+                    models.IntegerField(
+                        choices=[
+                            (0, "Draft"),
+                            (1, "Open"),
+                            (2, "Paid Partial"),
+                            (3, "Paid Full"),
+                            (4, "Closed"),
+                            (-1, "Void"),
+                        ],
+                        default=0,
+                    ),
+                ),
+                (
+                    "initial_balance",
+                    models.DecimalField(decimal_places=2, default=0, max_digits=32),
+                ),
+                (
+                    "paid_balance",
+                    models.DecimalField(decimal_places=2, default=0, max_digits=32),
+                ),
+                ("due_date", models.DateTimeField(null=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
             ],
         ),
         migrations.CreateModel(
-            name='SKU',
+            name="SKU",
             fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('name', models.CharField(blank=True, max_length=256)),
-                ('metadata', models.JSONField()),
-                ('default_quantity', models.DecimalField(decimal_places=2, default=Decimal('1'), max_digits=32)),
-                ('default_price', models.DecimalField(decimal_places=2, default=Decimal('1'), max_digits=32)),
-                ('minimum_quantity', models.DecimalField(decimal_places=2, max_digits=32, null=True)),
-                ('minimum_price', models.DecimalField(decimal_places=2, max_digits=32, null=True)),
-                ('maximum_quantity', models.DecimalField(decimal_places=2, max_digits=32, null=True)),
-                ('maximum_price', models.DecimalField(decimal_places=2, max_digits=32, null=True)),
-                ('units', models.CharField(blank=True, default='unit', max_length=32)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
+                (
+                    "id",
+                    models.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
+                ),
+                ("name", models.CharField(blank=True, max_length=256)),
+                ("metadata", models.JSONField()),
+                (
+                    "default_quantity",
+                    models.DecimalField(
+                        decimal_places=2, default=Decimal("1"), max_digits=32
+                    ),
+                ),
+                (
+                    "default_price",
+                    models.DecimalField(
+                        decimal_places=2, default=Decimal("1"), max_digits=32
+                    ),
+                ),
+                (
+                    "minimum_quantity",
+                    models.DecimalField(decimal_places=2, max_digits=32, null=True),
+                ),
+                (
+                    "minimum_price",
+                    models.DecimalField(decimal_places=2, max_digits=32, null=True),
+                ),
+                (
+                    "maximum_quantity",
+                    models.DecimalField(decimal_places=2, max_digits=32, null=True),
+                ),
+                (
+                    "maximum_price",
+                    models.DecimalField(decimal_places=2, max_digits=32, null=True),
+                ),
+                ("units", models.CharField(blank=True, default="unit", max_length=32)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
             ],
             managers=[
-                ('staff', django.db.models.manager.Manager()),
+                ("staff", django.db.models.manager.Manager()),
             ],
         ),
         migrations.CreateModel(
-            name='LineItem',
+            name="LineItem",
             fields=[
-                ('uid', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('quantity', models.DecimalField(decimal_places=2, max_digits=32)),
-                ('price', models.DecimalField(decimal_places=2, max_digits=32)),
-                ('subtotal', models.DecimalField(decimal_places=2, max_digits=32)),
-                ('posted_date', models.DateTimeField(auto_now_add=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('invoice', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='line_items', to='app.invoice')),
-                ('sku', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='+', to='app.sku')),
-                ('service_date', models.DateTimeField(auto_now_add=True, default=django.utils.timezone.now)),
+                (
+                    "uid",
+                    models.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
+                ),
+                ("quantity", models.DecimalField(decimal_places=2, max_digits=32)),
+                ("price", models.DecimalField(decimal_places=2, max_digits=32)),
+                ("subtotal", models.DecimalField(decimal_places=2, max_digits=32)),
+                ("posted_date", models.DateTimeField(auto_now_add=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "invoice",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="line_items",
+                        to="app.invoice",
+                    ),
+                ),
+                (
+                    "sku",
+                    models.ForeignKey(
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="+",
+                        to="app.sku",
+                    ),
+                ),
+                (
+                    "service_date",
+                    models.DateTimeField(
+                        auto_now_add=True, default=django.utils.timezone.now
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='Vessel',
+            name="Vessel",
             fields=[
-                ('uid', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('name', models.CharField(max_length=256)),
-                ('mmsi', models.CharField(blank=True, default='', help_text='Maritime Mobile Service Identity', max_length=9)),
-                ('metadata', models.JSONField(null=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('client', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='vessels', to='app.client')),
-                ('image', models.FileField(null=True, upload_to='')),
+                (
+                    "uid",
+                    models.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
+                ),
+                ("name", models.CharField(max_length=256)),
+                (
+                    "mmsi",
+                    models.CharField(
+                        blank=True,
+                        default="",
+                        help_text="Maritime Mobile Service Identity",
+                        max_length=9,
+                    ),
+                ),
+                ("metadata", models.JSONField(null=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "client",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="vessels",
+                        to="app.client",
+                    ),
+                ),
+                ("image", models.FileField(null=True, upload_to="")),
             ],
         ),
         migrations.CreateModel(
-            name='Job',
+            name="Job",
             fields=[
-                ('uid', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('metadata', models.JSONField(null=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('vessel', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='jobs', to='app.vessel')),
+                (
+                    "uid",
+                    models.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
+                ),
+                ("metadata", models.JSONField(null=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "vessel",
+                    models.ForeignKey(
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="jobs",
+                        to="app.vessel",
+                    ),
+                ),
             ],
         ),
         migrations.AddField(
-            model_name='invoice',
-            name='job',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='invoices', to='app.job'),
+            model_name="invoice",
+            name="job",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="invoices",
+                to="app.job",
+            ),
         ),
         migrations.RenameField(
-            model_name='invoice',
-            old_name='id',
-            new_name='uid',
+            model_name="invoice",
+            old_name="id",
+            new_name="uid",
         ),
         migrations.AlterField(
-            model_name='invoice',
-            name='uid',
-            field=models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+            model_name="invoice",
+            name="uid",
+            field=models.UUIDField(
+                default=uuid.uuid4, editable=False, primary_key=True, serialize=False
+            ),
         ),
         migrations.AddField(
-            model_name='invoice',
-            name='client',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='invoices', to='app.client'),
+            model_name="invoice",
+            name="client",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="invoices",
+                to="app.client",
+            ),
         ),
         migrations.AddField(
-            model_name='invoice',
-            name='metadata',
+            model_name="invoice",
+            name="metadata",
             field=models.JSONField(null=True),
         ),
         migrations.AlterModelManagers(
-            name='sku',
+            name="sku",
             managers=[
-                ('services', django.db.models.manager.Manager()),
+                ("services", django.db.models.manager.Manager()),
             ],
         ),
         migrations.CreateModel(
-            name='Contact',
+            name="Contact",
             fields=[
-                ('uid', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('first_name', models.CharField(blank=True, max_length=256, null=True)),
-                ('last_name', models.CharField(max_length=256)),
-                ('title', models.CharField(blank=True, max_length=32, null=True)),
-                ('role', models.CharField(blank=True, max_length=256, null=True)),
-                ('primary_email', models.CharField(blank=True, max_length=256, null=True)),
-                ('phone_number', models.CharField(blank=True, max_length=256, null=True)),
-                ('mailing_address', models.TextField(blank=True, null=True)),
-                ('billing_address', models.TextField(blank=True, null=True)),
-                ('metadata', models.JSONField(null=True)),
-                ('connections', models.ManyToManyField(related_name='_contact_connections_+', to='app.Contact')),
-                ('image', models.FileField(null=True, upload_to='')),
+                (
+                    "uid",
+                    models.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
+                ),
+                ("first_name", models.CharField(blank=True, max_length=256, null=True)),
+                ("last_name", models.CharField(max_length=256)),
+                ("title", models.CharField(blank=True, max_length=32, null=True)),
+                ("role", models.CharField(blank=True, max_length=256, null=True)),
+                (
+                    "primary_email",
+                    models.CharField(blank=True, max_length=256, null=True),
+                ),
+                (
+                    "phone_number",
+                    models.CharField(blank=True, max_length=256, null=True),
+                ),
+                ("mailing_address", models.TextField(blank=True, null=True)),
+                ("billing_address", models.TextField(blank=True, null=True)),
+                ("metadata", models.JSONField(null=True)),
+                (
+                    "connections",
+                    models.ManyToManyField(
+                        related_name="_contact_connections_+", to="app.Contact"
+                    ),
+                ),
+                ("image", models.FileField(null=True, upload_to="")),
             ],
         ),
         migrations.AddField(
-            model_name='client',
-            name='contact',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='app.contact'),
+            model_name="client",
+            name="contact",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to="app.contact",
+            ),
         ),
         migrations.AddField(
-            model_name='sku',
-            name='contacts',
-            field=models.ManyToManyField(related_name='skus', to='app.Contact'),
+            model_name="sku",
+            name="contacts",
+            field=models.ManyToManyField(related_name="skus", to="app.Contact"),
         ),
         migrations.AddField(
-            model_name='sku',
-            name='related_skus',
-            field=models.ManyToManyField(related_name='_sku_related_skus_+', to='app.SKU'),
+            model_name="sku",
+            name="related_skus",
+            field=models.ManyToManyField(
+                related_name="_sku_related_skus_+", to="app.SKU"
+            ),
         ),
         migrations.CreateModel(
-            name='ItemSKU',
-            fields=[
-            ],
+            name="ItemSKU",
+            fields=[],
             options={
-                'proxy': True,
-                'indexes': [],
-                'constraints': [],
+                "proxy": True,
+                "indexes": [],
+                "constraints": [],
             },
-            bases=('app.sku',),
+            bases=("app.sku",),
         ),
         migrations.CreateModel(
-            name='ServiceSKU',
-            fields=[
-            ],
+            name="ServiceSKU",
+            fields=[],
             options={
-                'proxy': True,
-                'indexes': [],
-                'constraints': [],
+                "proxy": True,
+                "indexes": [],
+                "constraints": [],
             },
-            bases=('app.sku',),
+            bases=("app.sku",),
         ),
         migrations.CreateModel(
-            name='TransportationSKU',
-            fields=[
-            ],
+            name="TransportationSKU",
+            fields=[],
             options={
-                'proxy': True,
-                'indexes': [],
-                'constraints': [],
+                "proxy": True,
+                "indexes": [],
+                "constraints": [],
             },
-            bases=('app.sku',),
+            bases=("app.sku",),
         ),
         migrations.AlterModelManagers(
-            name='sku',
-            managers=[
+            name="sku",
+            managers=[],
+        ),
+        migrations.RenameField(
+            model_name="client",
+            old_name="id",
+            new_name="uid",
+        ),
+        migrations.CreateModel(
+            name="Credit",
+            fields=[
+                (
+                    "uid",
+                    models.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
+                ),
+                ("amount", models.DecimalField(decimal_places=2, max_digits=32)),
+                ("memo", models.TextField(blank=True)),
+                ("posted_date", models.DateTimeField(auto_now_add=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "invoice",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="credits",
+                        to="app.invoice",
+                    ),
+                ),
+                (
+                    "contact",
+                    models.ForeignKey(
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="+",
+                        to="app.contact",
+                    ),
+                ),
+                ("metadata", models.JSONField(null=True)),
             ],
         ),
         migrations.RenameField(
-            model_name='client',
-            old_name='id',
-            new_name='uid',
+            model_name="sku",
+            old_name="id",
+            new_name="uid",
         ),
         migrations.CreateModel(
-            name='Credit',
+            name="Task",
             fields=[
-                ('uid', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('amount', models.DecimalField(decimal_places=2, max_digits=32)),
-                ('memo', models.TextField(blank=True)),
-                ('posted_date', models.DateTimeField(auto_now_add=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('invoice', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='credits', to='app.invoice')),
-                ('contact', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='+', to='app.contact')),
-                ('metadata', models.JSONField(null=True)),
+                (
+                    "uid",
+                    models.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
+                ),
+                (
+                    "state",
+                    models.IntegerField(
+                        choices=[
+                            (0, "Received"),
+                            (1, "In Progress"),
+                            (-1, "Rejected"),
+                            (2, "Processed"),
+                        ],
+                        default=0,
+                    ),
+                ),
+                ("metadata", models.JSONField(null=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "client",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="tasks",
+                        to="app.client",
+                    ),
+                ),
+                (
+                    "contact_mentions",
+                    models.ManyToManyField(
+                        related_name="task_mentions", to="app.Contact"
+                    ),
+                ),
             ],
         ),
-        migrations.RenameField(
-            model_name='sku',
-            old_name='id',
-            new_name='uid',
+        migrations.AddField(
+            model_name="job",
+            name="origin_task",
+            field=models.ForeignKey(
+                null=True, on_delete=django.db.models.deletion.SET_NULL, to="app.task"
+            ),
+        ),
+        migrations.AddField(
+            model_name="client",
+            name="image",
+            field=models.FileField(null=True, upload_to=""),
+        ),
+        migrations.AddField(
+            model_name="sku",
+            name="image",
+            field=models.FileField(null=True, upload_to=""),
         ),
         migrations.CreateModel(
-            name='Task',
+            name="Attachment",
             fields=[
-                ('uid', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('state', models.IntegerField(choices=[(0, 'Received'), (1, 'In Progress'), (-1, 'Rejected'), (2, 'Processed')], default=0)),
-                ('metadata', models.JSONField(null=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('client', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='tasks', to='app.client')),
-                ('contact_mentions', models.ManyToManyField(related_name='task_mentions', to='app.Contact')),
-            ],
-        ),
-        migrations.AddField(
-            model_name='job',
-            name='origin_task',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='app.task'),
-        ),
-        migrations.AddField(
-            model_name='client',
-            name='image',
-            field=models.FileField(null=True, upload_to=''),
-        ),
-        migrations.AddField(
-            model_name='sku',
-            name='image',
-            field=models.FileField(null=True, upload_to=''),
-        ),
-        migrations.CreateModel(
-            name='Attachment',
-            fields=[
-                ('uid', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('object_id', models.UUIDField()),
-                ('attached_file', models.FileField(upload_to='')),
-                ('metadata', models.JSONField(null=True)),
-                ('content_type', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='contenttypes.contenttype')),
-                ('name', models.CharField(default='foo', max_length=256)),
-                ('created_at', models.DateTimeField(auto_now_add=True, default=datetime.datetime(2020, 12, 21, 17, 58, 6, 579309, tzinfo=utc))),
-                ('updated_at', models.DateTimeField(auto_now=True)),
+                (
+                    "uid",
+                    models.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
+                ),
+                ("object_id", models.UUIDField()),
+                ("attached_file", models.FileField(upload_to="")),
+                ("metadata", models.JSONField(null=True)),
+                (
+                    "content_type",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="contenttypes.contenttype",
+                    ),
+                ),
+                ("name", models.CharField(default="foo", max_length=256)),
+                (
+                    "created_at",
+                    models.DateTimeField(
+                        auto_now_add=True,
+                        default=datetime.datetime(
+                            2020, 12, 21, 17, 58, 6, 579309, tzinfo=utc
+                        ),
+                    ),
+                ),
+                ("updated_at", models.DateTimeField(auto_now=True)),
             ],
         ),
     ]

@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('app', '0006_formtemplate_annotations'),
+        ("app", "0006_formtemplate_annotations"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='formtemplate',
-            name='default_fields',
+            model_name="formtemplate",
+            name="default_fields",
             field=models.JSONField(null=True),
         ),
     ]
