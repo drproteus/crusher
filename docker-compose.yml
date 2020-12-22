@@ -11,19 +11,14 @@ services:
       MYSQL_USER: crusher
       MYSQL_PASSWORD: $MYSQL_PASSWORD
       MYSQL_DATABASE: crusher
+      AWS_ACCESS_KEY: $MINIO_ACCESS_KEY
+      AWS_SECRET_KEY: $MINIO_SECRET_KEY
+      AWS_S3_ENDPOINT_URL: $AWS_S3_ENDPOINT_URL
     restart: unless-stopped
-    command: "gunicorn -b 0.0.0.0:8080 crusher.wsgi"
+    # command: "gunicorn -b 0.0.0.0:8080 crusher.wsgi"
+    command: "python manage.py runserver 0.0.0.0:8080"
     depends_on:
       - db
-  # caddy:
-  #   image: caddy:2.1.1-alpine
-  #   volumes:
-  #     - ./Caddyfile:/etc/caddy/Caddyfile
-  #     - assets:/var/www/assets:ro
-  #   ports:
-  #     - "80:80"
-  #     - "443:443"
-  #   restart: unless-stopped
   db:
     image: mariadb:10
     volumes:
@@ -34,9 +29,7 @@ services:
       MYSQL_PASSWORD: $MYSQL_PASSWORD
       MYSQL_DATABASE: crusher
     restart: unless-stopped
-  rabbitmq:
-    image: rabbitmq:3
-    restart: unless-stopped
 volumes:
   mariadb_data:
   assets:
+  bucket_data:

@@ -116,7 +116,9 @@ GitHub.sublime-settings
 .history
 
 # Staticfiles
-static
 media
 
 .vscode/
+frontend/node_modules/
+static/
+node_modules/

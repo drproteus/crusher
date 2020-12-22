@@ -14,13 +14,37 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, re_path
 from django.conf import settings
 from django.conf.urls.static import static
+from django.views.generic.base import TemplateView
+
+from graphene_django.views import GraphQLView
+import app.views
 
 urlpatterns = [
-    path("admin/", admin.site.urls),
+    path("graphql", GraphQLView.as_view(graphiql=True)),
+    path(
+        "upload/invoice-attachment/<uuid:invoice_uid>",
+        app.views.InvoiceAttachmentView.as_view(),
+    ),
+    path(
+        "upload/contact-attachment/<uuid:contact_uid>",
+        app.views.ContactAttachmentView.as_view(),
+    ),
+    path(
+        "upload/client-attachment/<uuid:client_uid>",
+        app.views.ClientAttachmentView.as_view(),
+    ),
+    path("upload/client-image/<uuid:client_uid>", app.views.ClientImageView.as_view(),),
+    path(
+        "upload/contact-image/<uuid:contact_uid>", app.views.ContactImageView.as_view(),
+    ),
+    path("upload/sku-image/<uuid:sku_uid>", app.views.SKUImageView.as_view()),
+    path("upload/attachment/<uuid:attachment_uid>", app.views.AttachmentView.as_view()),
+    re_path(".*", TemplateView.as_view(template_name="app/index.html")),
 ]
 
-urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
-urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+if settings.DEBUG:
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
