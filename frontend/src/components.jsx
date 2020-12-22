@@ -57,6 +57,12 @@ function Client() {
   return <ClientDetail client={data.client}></ClientDetail>;
 }
 
+function FormTemplates({ client }) {
+  return client.forms.edges.map(({ node }) => {
+    return <li><a href={node.url}>{node.templateFile}</a></li>
+  });
+};
+
 function ClientsAsList() {
   const { loading, error, data } = useQuery(CLIENTS, {
     variables: useParams(),
@@ -211,6 +217,9 @@ function ClientDetail({ client }) {
                 Upload Attachment
               </Button>
               <h6>Attachments</h6>
+              <ul className="m-t-3">
+                <FormTemplates client={client}></FormTemplates>
+              </ul>
             </Col>
           </Row>
         </ListGroup.Item>
