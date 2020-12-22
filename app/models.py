@@ -492,3 +492,6 @@ class RenderedForm(models.Model):
     )
     rendering_data = models.JSONField(null=True)
     rendered_file = models.FileField()
+    client = models.ForeignKey(
+        Client, on_delete=models.SET_NULL, null=True, related_name="rendered_forms"
+    )
