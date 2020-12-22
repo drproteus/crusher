@@ -29,6 +29,16 @@ services:
       MYSQL_PASSWORD: $MYSQL_PASSWORD
       MYSQL_DATABASE: crusher
     restart: unless-stopped
+  storage:
+    image: minio/minio
+    volumes:
+      - bucket_data:/data
+    command: ["server", "/data"]
+    environment:
+      MINIO_ACCESS_KEY: $MINIO_ACCESS_KEY
+      MINIO_SECRET_KEY: $MINIO_SECRET_KEY
+    ports:
+      - "9000:9000"
 volumes:
   mariadb_data:
   assets:
