@@ -406,7 +406,7 @@ class FormTemplate(models.Model):
                             annotation["/T"]
                         ),
                         "initial_value": annotation["/V"] or "",
-                        "annot_idx": i + 1,  # pdf 1-indexed
+                        "annot_idx": i,
                     }
                 )
         template_file.seek(0)
@@ -438,14 +438,17 @@ class FormTemplate(models.Model):
         for field_name, value in data.items():
             if field_name in self.annotations_by_name:
                 idx = self.annotations_by_name[field_name]["annot_idx"]
-                annot = template.pages[0].Annots[idx]
-                if not annot:
-                    continue
-                if isinstance(value, bool) and value:
-                    annot.update(pdfrw.PdfDict(AS=pdfrw.PdfName("Yes")))
-                else:
-                    annot.update(pdfrw.PdfDict(V="{}".format(value)))
-                annot.update(pdfrw.PdfDict(AP=""))
+                try:
+                    annot = template.pages[0].Annots[idx]
+                    if not annot:
+                        continue
+                    if isinstance(value, bool) and value:
+                        annot.update(pdfrw.PdfDict(AS=pdfrw.PdfName("Yes")))
+                    else:
+                        annot.update(pdfrw.PdfDict(V="{}".format(value)))
+                    annot.update(pdfrw.PdfDict(AP=""))
+                except Exception as e:
+                    print(idx, e)
         return template
 
     def get_overlay_canvas(self, field_data):
