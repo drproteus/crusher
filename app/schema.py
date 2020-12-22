@@ -60,6 +60,20 @@ class ModifyFormTemplateMutation(graphene.Mutation):
         return ModifyFormTemplateMutation(form_template=template)
 
 
+class RenderFormTemplateMutation(graphene.Mutation):
+    class Arguments:
+        uid = graphene.UUID()
+        fields = generic.GenericScalar()
+
+    rendered_form = graphene.Field(RenderedFormNode)
+
+    @classmethod
+    def mutate(cls, root, info, uid, fields):
+        template = FormTemplateModel.objects.get(pk=uid)
+        rendered_form = template.render_with_data(fields)
+        return RenderFormTemplateMutation(rendered_form=rendered_form)
+
+
 class ContactInput(graphene.InputObjectType):
     first_name = graphene.String()
     last_name = graphene.String()
@@ -513,6 +527,7 @@ class Mutations(graphene.ObjectType):
     delete_credit = DeleteCreditMutation.Field()
 
     modify_form_template = ModifyFormTemplateMutation.Field()
+    render_form = RenderFormTemplateMutation.Field()
 
 
 class Query(graphene.ObjectType):

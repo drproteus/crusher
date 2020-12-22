@@ -393,7 +393,7 @@ class FormTemplate(models.Model):
         }
 
     @classmethod
-    def parse_annotations(self, template_file):
+    def parse_annotations(cls, template_file):
         annots = []
         if not template_file:
             return annots
@@ -402,13 +402,21 @@ class FormTemplate(models.Model):
             for i, annotation in enumerate(page.Annots):
                 annots.append(
                     {
-                        "field_name": annotation["/T"],
+                        "field_name": cls.make_annotation_key_valid_json_key(
+                            annotation["/T"]
+                        ),
                         "initial_value": annotation["/V"] or "",
                         "annot_idx": i + 1,  # pdf 1-indexed
                     }
                 )
         template_file.seek(0)
         return annots
+
+    @classmethod
+    def make_annotation_key_valid_json_key(cls, key):
+        if not key:
+            return
+        return key.translate(key.maketrans({"(": "_", ")": "_", " ": "_"}))
 
     def write_parsed_annotations(self):
         self.annotations = self.parse_annotations(self.template_file)
@@ -427,7 +435,7 @@ class FormTemplate(models.Model):
         template = pdfrw.PdfReader(self.template_file)
         for field_name, value in data.items():
             if field_name in self.annotations_by_name:
-                idx = self.annotations_by_name["annot_idx"]
+                idx = self.annotations_by_name[field_name]["annot_idx"]
                 annot = template.pages[0].Annots[idx]
                 if not annot:
                     continue
@@ -436,13 +444,13 @@ class FormTemplate(models.Model):
                 else:
                     annot.update(pdfrw.PdfDict(V="{}".format(value)))
                 annot.update(pdfrw.PdfDict(AP=""))
-        template.seek(0)
         return template
 
     def get_overlay_canvas(self, field_data):
         data = io.BytesIO()
         pdf = canvas.Canvas(data)
-        for field_name, field in self.fields.items():
+        fields = self.fields or {}
+        for field_name, field in fields.items():
             if field["type"] != "point":
                 continue
             x, y = field["coords"]
@@ -452,13 +460,12 @@ class FormTemplate(models.Model):
         return data
 
     def merge(self, canvas_data, template):
-        template_pdf = pdfrw.PdfReader(self.template_file)
         overlay_pdf = pdfrw.PdfReader(canvas_data)
-        for page, data in zip(template_pdf.pages, overlay_pdf.pages):
+        for page, data in zip(template.pages, overlay_pdf.pages):
             overlay = pdfrw.PageMerge().add(data)[0]
             pdfrw.PageMerge(page).add(overlay).render()
         form = io.BytesIO()
-        pdfrw.PdfWriter().write(form, template_pdf)
+        pdfrw.PdfWriter().write(form, template)
         form.seek(0)
         return form
 
