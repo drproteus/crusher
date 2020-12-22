@@ -11,3 +11,5 @@ django-filter>=2
 django-storages==1.11
 boto3==1.16.40
 botocore==1.19.40
+reportlab==3.5.56
+pdfrw==0.4

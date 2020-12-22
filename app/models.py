@@ -11,6 +11,13 @@ from app.metadata import (
 )
 import uuid
 
+### for rendering --> move elsewhere later
+import io
+import pdfrw
+from reportlab.pdfgen import canvas
+
+###
+
 
 class Attachment(models.Model):
     uid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -338,6 +345,14 @@ class Credit(models.Model):
 
 
 class FormTemplate(models.Model):
+    """
+    expects a fields object like:
+        {
+            "first_name": [32, 32], # x, y
+            "last_name": [64, 32],
+            ...
+        }
+    """
     uid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=256)
     fields = models.JSONField(null=True)
@@ -346,6 +361,40 @@ class FormTemplate(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     clients = models.ManyToManyField(Client, related_name="forms")
+
+    def render_with_data(self, data):
+        canvas_data = self.get_overlay_canvas(data)
+        form = self.merge(canvas_data, self.template_file)
+        return self.write_form(form)
+
+    def get_overlay_canvas(self, field_data):
+        data = io.BytesIO()
+        pdf = canvas.Canvas(data)
+        for field_name, (x, y) in self.fields.items():
+            pdf.drawString(x=x, y=y, text=field_data.get(field_name, ""))
+        pdf.save()
+        data.seek(0)
+        return data
+
+    def merge(self, canvas_data, template):
+        template_pdf = pdfrw.PdfReader(self.template_file)
+        overlay_pdf = pdfrw.PdfReader(canvas_data)
+        for page, data in zip(template_pdf.pages, overlay_pdf.pages):
+            overlay = pdfrw.PageMerge().add(data)[0]
+            pdfrw.PageMerge(page).add(overlay).render()
+        form = io.BytesIO()
+        pdfrw.PdfWriter().write(form, template_pdf)
+        form.seek(0)
+        return form
+
+    def write_form(self, form_obj, data):
+        pdf_uuid = uuid()
+        form_filename = f"rendered_forms/{self.name}/{pdf_uuid}.pdf"
+        form_obj.name = form_filename
+        rendered = RenderedForm.objects.create(
+            template=self, rendered_data=data, rendered_file=form_obj
+        )
+        return rendered
 
 
 class RenderedForm(models.Model):
