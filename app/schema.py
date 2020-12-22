@@ -57,6 +57,7 @@ class ModifyFormTemplateMutation(graphene.Mutation):
                 template.fields = original
             else:
                 template.fields = fields
+            template.save()
         return ModifyFormTemplateMutation(form_template=template)
 
 
