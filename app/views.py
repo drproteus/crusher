@@ -233,5 +233,8 @@ class FormTemplateView(View):
             template.save()
         except FormTemplate.DoesNotExist:
             template = FormTemplate.objects.create(name=name, template_file=file_obj)
-
+        try:
+            template.write_parsed_annotations()
+        except Exception:
+            print("Failed to parse annotations...") # !!!
         return HttpResponse(template.template_file.url, status=200)

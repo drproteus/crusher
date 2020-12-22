@@ -349,9 +349,15 @@ class FormTemplate(models.Model):
     """
     expects a fields object like:
         {
-            "first_name": [32, 32], # x, y
-            "last_name": [64, 32],
-            ...
+            "first_name": {
+                "type": "annotation",
+                "annot_idx": 1,
+                "disables": [<annotation indices that get disabled if this is true>]
+            },
+            "last_name": {
+                "type": "point",
+                "coords": [32, 32]
+            }
         }
     """
 
@@ -360,9 +366,53 @@ class FormTemplate(models.Model):
     fields = models.JSONField(null=True)
     template_file = models.FileField()
     metadata = models.JSONField(null=True)
+    annotations = models.JSONField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     clients = models.ManyToManyField(Client, related_name="forms")
+
+    @property
+    def annotations_by_idx(self):
+        return {
+            annotation["annot_idx"]: {
+                "initial_value": annotation["initial_value"],
+                "field_name": annotation["field_name"],
+            }
+            for annotation in self.annotations
+        }
+
+    @property
+    def annotations_by_name(self):
+        return {
+            annotation["field_name"]: {
+                "initial_value": annotation["initial_value"],
+                "annot_idx": annotation["annot_idx"],
+            }
+            for annotation in self.annotations
+        }
+
+    @classmethod
+    def parse_annotations(self, template_file):
+        annots = []
+        if not template_file:
+            return annots
+        template = pdfrw.PdfReader(template_file)
+        for page in template.pages:
+            for i, annotation in enumerate(page.Annots):
+                annots.append(
+                    {
+                        "field_name": annotation["/T"],
+                        "initial_value": annotation["/V"] or "",
+                        "annot_idx": i + 1,  # pdf 1-indexed
+                    }
+                )
+        template_file.seek(0)
+        return annots
+
+    def write_parsed_annotations(self):
+        self.annotations = self.parse_annotations(self.template_file)
+        self.save()
+        return self.annotations
 
     def render_with_data(self, data):
         canvas_data = self.get_overlay_canvas(data)

@@ -259,6 +259,7 @@ class FormTemplateNode(DjangoObjectType):
     fields = generic.GenericScalar()
     metadata = generic.GenericScalar()
     url = graphene.String()
+    annotations = generic.GenericScalar()
 
     def resolve_url(self, info):
         if not self.template_file:
