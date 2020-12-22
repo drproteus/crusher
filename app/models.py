@@ -364,6 +364,7 @@ class FormTemplate(models.Model):
     uid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=256)
     fields = models.JSONField(null=True)
+    default_fields = models.JSONField(null=True)
     template_file = models.FileField()
     metadata = models.JSONField(null=True)
     annotations = models.JSONField(null=True)
@@ -415,6 +416,8 @@ class FormTemplate(models.Model):
         return self.annotations
 
     def render_with_data(self, data):
+        default_fields = self.default_fields or {}
+        data.update(default_fields)
         template = self.fill_template_with_annotation_fields(data)
         canvas_data = self.get_overlay_canvas(data)
         form = self.merge(canvas_data, template)
