@@ -379,7 +379,7 @@ class FormTemplate(models.Model):
                 "initial_value": annotation["initial_value"],
                 "field_name": annotation["field_name"],
             }
-            for annotation in self.annotations
+            for annotation in self.annotations or []
         }
 
     @property
@@ -389,7 +389,7 @@ class FormTemplate(models.Model):
                 "initial_value": annotation["initial_value"],
                 "annot_idx": annotation["annot_idx"],
             }
-            for annotation in self.annotations
+            for annotation in self.annotations or []
         }
 
     @classmethod
@@ -416,7 +416,9 @@ class FormTemplate(models.Model):
     def make_annotation_key_valid_json_key(cls, key):
         if not key:
             return
-        return key.translate(key.maketrans({"(": "_", ")": "_", " ": "_"}))
+        return key.translate(
+            key.maketrans({"(": "_", ")": "_", " ": "_", "'": "_", '"': "_"})
+        )
 
     def write_parsed_annotations(self):
         self.annotations = self.parse_annotations(self.template_file)
