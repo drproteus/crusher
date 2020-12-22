@@ -43,6 +43,16 @@ const CLIENT_DETAIL = gql`
           }
         }
       }
+      forms {
+        edges {
+          node {
+            uid
+            url
+            templateFile
+            createdAt
+          }
+        }
+      }
       invoices(state: $invoiceState) {
         edges {
           node {
