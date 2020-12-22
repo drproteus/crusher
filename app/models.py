@@ -335,3 +335,23 @@ class Credit(models.Model):
         self.invoice.update_balances()
         self.metadata = CreditMetadataSchema().load(self.metadata)
         return super().save(*args, **kwargs)
+
+
+class FormTemplate(models.Model):
+    uid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=256)
+    fields = models.JSONField(null=True)
+    template_file = models.FileField()
+    metadata = models.JSONField(null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    clients = models.ManyToManyField(Client, related_name="forms")
+
+
+class RenderedForm(models.Model):
+    uid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    template = models.ForeignKey(
+        FormTemplate, on_delete=models.SET_NULL, null=True, related_name="+"
+    )
+    rendering_data = models.JSONField(null=True)
+    rendered_file = models.FileField()
