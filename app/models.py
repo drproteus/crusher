@@ -348,7 +348,7 @@ class Credit(models.Model):
 class FormTemplate(models.Model):
     """
     expects a fields object like:
-        [{
+        {
             "first_name": {
                 "type": "annotation",
                 "annot_idx": 1,
@@ -358,7 +358,7 @@ class FormTemplate(models.Model):
                 "type": "point",
                 "coords": [32, 32]
             }
-        }, ... <page 2> ...]
+        }
     """
 
     uid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -372,31 +372,50 @@ class FormTemplate(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     clients = models.ManyToManyField(Client, related_name="forms")
 
+    @property
+    def annotations_by_idx(self):
+        return {
+            annotation["annot_idx"]: {
+                "initial_value": annotation["initial_value"],
+                "field_name": annotation["field_name"],
+            }
+            for annotation in self.annotations or []
+        }
+
+    @property
+    def annotations_by_name(self):
+        return {
+            annotation["field_name"]: {
+                "initial_value": annotation["initial_value"],
+                "annot_idx": annotation["annot_idx"],
+            }
+            for annotation in self.annotations or []
+        }
+
     @classmethod
     def parse_annotations(cls, template_file):
         annots = []
         if not template_file:
             return annots
         template = pdfrw.PdfReader(template_file)
-        for page_num, page in enumerate(template.pages):
-            page_annots = {}
+        for page in template.pages:
             for i, annotation in enumerate(page.Annots):
-                field_name = cls.make_annotation_key_valid_json_key(
-                    annotation["/T"], page_num, i
+                annots.append(
+                    {
+                        "field_name": cls.make_annotation_key_valid_json_key(
+                            annotation["/T"]
+                        ),
+                        "initial_value": annotation["/V"] or "",
+                        "annot_idx": i,
+                    }
                 )
-                page_annots[field_name] = {
-                    "initial_value": annotation["/V"] or "",
-                    "annot_idx": i,
-                    "page": page_num,
-                }
-            annots.append(page_annots)
         template_file.seek(0)
         return annots
 
     @classmethod
-    def make_annotation_key_valid_json_key(cls, key, page_num=0, i=0):
+    def make_annotation_key_valid_json_key(cls, key):
         if not key:
-            return f"unknown_{page_num}_{i}"
+            return
         return key.translate(
             key.maketrans({"(": "_", ")": "_", " ": "_", "'": "_", '"': "_"})
         )
@@ -414,14 +433,15 @@ class FormTemplate(models.Model):
         form = self.merge(canvas_data, template)
         return self.write_form(form, data)
 
-    def fill_template_with_annotation_fields(self, data_pages):
+    def fill_template_with_annotation_fields(self, data):
         template = pdfrw.PdfReader(self.template_file)
-        for data_page in data_pages:
-            for field_name, field in data_page.items():
-                idx = field["annot_idx"]
-                page = field.get("page", 0)
+        for field_name, value in data.items():
+            if field_name in self.annotations_by_name:
+                idx = self.annotations_by_name[field_name]["annot_idx"]
                 try:
-                    annot = template.Root.Pages.Kids[page].Annots[idx]
+                    annot = template.pages[0].Annots[idx]
+                    if not annot:
+                        continue
                     if isinstance(value, bool) and value:
                         annot.update(pdfrw.PdfDict(AS=pdfrw.PdfName("Yes")))
                     else:
@@ -431,28 +451,22 @@ class FormTemplate(models.Model):
                     print(idx, e)
         return template
 
-    def get_overlay_canvas(self, data_pages):
+    def get_overlay_canvas(self, field_data):
         data = io.BytesIO()
         pdf = canvas.Canvas(data)
         fields = self.fields or {}
         pdf.setFontSize(size=10)
-        started_pdf = False
-        for data_page in data_pages:
-            if started_pdf:
-                pdf._startPage()
-            else:
-               started_pdf = True
-            for field_name, field in data_page.items():
-                if field["type"] == "text":
-                    x, y = field["coords"]
-                    font_size = field.get("size", None)
-                    pdf.setFontSize(size=font_size)
-                    pdf.drawString(x=x, y=y, text=field_data.get(field_name, ""))
-                    pdf.setFontSize(size=10)
-                elif field["type"] == "select":
-                    x, y = field["coords"]
-                    radius = field.get("radius", 2)
-                    pdf.circle(x, y, radius, fill=1)
+        for field_name, field in fields.items():
+            if field["type"] == "text":
+                x, y = field["coords"]
+                font_size = field.get("size", None)
+                pdf.setFontSize(size=font_size)
+                pdf.drawString(x=x, y=y, text=field_data.get(field_name, ""))
+                pdf.setFontSize(size=10)
+            elif field["type"] == "select":
+                x, y = field["coords"]
+                radius = field.get("radius", 2)
+                pdf.circle(x, y, radius, fill=1)
         pdf.save()
         data.seek(0)
         return data
