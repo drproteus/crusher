@@ -502,3 +502,4 @@ class RenderedForm(models.Model):
     client = models.ForeignKey(
         Client, on_delete=models.SET_NULL, null=True, related_name="rendered_forms"
     )
+    metadata = models.JSONField(null=True)

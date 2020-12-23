@@ -65,13 +65,17 @@ class RenderFormTemplateMutation(graphene.Mutation):
     class Arguments:
         uid = graphene.UUID()
         fields = generic.GenericScalar()
+        metadata = generic.GenericScalar()
 
     rendered_form = graphene.Field(RenderedFormNode)
 
     @classmethod
-    def mutate(cls, root, info, uid, fields):
+    def mutate(cls, root, info, uid, fields, metadata=None):
         template = FormTemplateModel.objects.get(pk=uid)
         rendered_form = template.render_with_data(fields)
+        if metadata:
+            rendered_form.metadata = metadata
+            rendered_form.save()
         return RenderFormTemplateMutation(rendered_form=rendered_form)
 
 
