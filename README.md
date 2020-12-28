@@ -24,5 +24,8 @@ For naval medical operations, provides:
 * after making model adjustments, run `make makemigrations` to generate the new migrations, then run `make migrate` to apply
 * by default, a GraphiQL interface is available @ http://localhost:8080/graphql
 
+### Dev-scrots
+https://sharry.jakeg.dev/app/open/9px6PycP4xT-hwG2foENBDz-esq7VkgVMkX-i4dBDbU3uBp
+
 ---
 ![dr. crusher](https://live.staticflickr.com/4856/45142715954_8f50020329.jpg)
