@@ -28,6 +28,7 @@ For naval medical operations, provides:
 
 ![3](https://static.skinet.org/scrots/scrot-21.jpg)
 ![2](https://static.skinet.org/scrots/scrot-20.jpg)
+![1](https://static.skinet.org/scrots/scrot-19.jpg)
 
 
 
